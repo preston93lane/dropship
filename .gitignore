@@ -12,3 +12,5 @@ supabase/.branches/
 .claude/skills/motion-graphics/remotion/node_modules/
 .claude/skills/motion-graphics/remotion/out/
 .claude/settings.local.json
+.claude/skills/motion-graphics/remotion/public/demo/
+.claude/skills/static-ad-design/out/

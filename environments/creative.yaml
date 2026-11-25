@@ -1,0 +1,19 @@
+# Sandbox for the CREATE loop (creative-director, static-designer, video-producer, compliance-reviewer).
+# Media generation goes through fal.ai; assets live in Supabase Storage. Package managers are allowed so
+# the Remotion project can `npm ci`. ffmpeg, ImageMagick, Playwright + Chromium are preinstalled.
+name: dropship-creative
+config:
+  type: cloud
+  packages:
+    apt: [fonts-inter, fonts-noto-color-emoji]
+  networking:
+    type: limited
+    allow_package_managers: true
+    allowed_hosts:
+      - YOUR_PROJECT_REF.supabase.co   # gateway + storage
+      - queue.fal.run                   # fal queue API
+      - fal.run
+      - "*.fal.media"                   # fal output CDN
+      - fal.media
+      - fonts.googleapis.com            # web fonts for static templates
+      - fonts.gstatic.com

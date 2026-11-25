@@ -1,0 +1,9 @@
+{
+  "problemImage": "scene-demo.jpg",
+  "problemLabel": "The problem",
+  "problem": "Cables everywhere. Again.",
+  "fixLabel": "The fix",
+  "fix": "*Six cables*, one strip, ten seconds.",
+  "product": "product-demo.png",
+  "cta": "Shop now →"
+}

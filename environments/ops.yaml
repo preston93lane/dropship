@@ -1,0 +1,10 @@
+# Sandbox for PLAN / EXECUTE / ADAPT / REPORT / STRATEGY (orchestrator, store-manager, media-buyer,
+# performance-analyst, marketing-strategist). Ops agents only talk to the gateway; the gateway holds
+# every store/ad-platform credential.
+name: dropship-ops
+config:
+  type: cloud
+  networking:
+    type: limited
+    allowed_hosts:
+      - YOUR_PROJECT_REF.supabase.co

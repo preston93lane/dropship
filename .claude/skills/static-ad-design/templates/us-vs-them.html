@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  .ad { padding: 6vh 6vw; background: radial-gradient(circle at 50% 0%, #283042, var(--bg) 70%); }
+  .headline { font-size: 8vw; margin-bottom: 3vh; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0 1.2vh; font-size: 4.2vw; }
+  th { font-weight: 900; font-size: 4.4vw; padding-bottom: 1vh; }
+  th.ours { color: var(--accent); }
+  td { background: rgba(255,255,255,.06); padding: 2.2vw 2.6vw; font-weight: 700; }
+  td:first-child { border-radius: 2vw 0 0 2vw; color: var(--muted); font-weight: 600; }
+  td:last-child { border-radius: 0 2vw 2vw 0; }
+  td.mark { text-align: center; font-size: 5.4vw; width: 20vw; }
+  td.ours { background: rgba(255,225,77,.14); }
+  .yes { color: var(--good); } .no { color: var(--bad); }
+  .thumb { width: 14vw; height: 14vw; object-fit: contain; display: block; margin: 0 auto 1vh; }
+  .cta { position: absolute; left: 6vw; right: 6vw; bottom: 5vh; }
+</style></head>
+<body><div class="ad">
+  <div class="headline" data-html="headline"></div>
+  <table><thead><tr><th></th><th class="ours"><img class="thumb" data-src="product" alt=""><span data-text="oursLabel"></span></th><th data-text="themLabel"></th></tr></thead><tbody></tbody></table>
+  <div class="cta" data-text="cta"></div>
+</div>
+<script>
+(() => {
+  const P = window.PROPS || {};
+  const tb = document.querySelector('tbody');
+  (P.rows || []).slice(0, 6).forEach(r => {
+    const tr = document.createElement('tr');
+    const td = (cls, txt) => { const d = document.createElement('td'); d.className = cls; d.textContent = txt; return d; };
+    tr.append(td('', r.feature), td('mark ours ' + (r.ours ? 'yes' : 'no'), r.ours ? '✓' : '✗'), td('mark ' + (r.them ? 'yes' : 'no'), r.them ? '✓' : '✗'));
+    tb.append(tr);
+  });
+})();
+</script></body></html>

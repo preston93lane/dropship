@@ -1,0 +1,133 @@
+{
+ "width": 1080,
+ "height": 1920,
+ "fps": 30,
+ "clips": [
+  {
+   "src": "demo/hook.mp4",
+   "type": "video",
+   "duration": 2.6
+  },
+  {
+   "src": "demo/product.png",
+   "type": "image",
+   "duration": 2.4,
+   "motion": "zoom_in"
+  },
+  {
+   "src": "demo/hook.mp4",
+   "type": "video",
+   "duration": 2.4,
+   "startFrom": 1
+  }
+ ],
+ "voiceover": "demo/vo.mp3",
+ "voiceoverOffset": 0.1,
+ "words": [
+  {
+   "text": "My",
+   "start": 0.15,
+   "end": 0.393
+  },
+  {
+   "text": "desk",
+   "start": 0.42,
+   "end": 0.744
+  },
+  {
+   "text": "was",
+   "start": 0.78,
+   "end": 1.064
+  },
+  {
+   "text": "chaos.",
+   "start": 1.095,
+   "end": 1.5
+  },
+  {
+   "text": "Six",
+   "start": 1.545,
+   "end": 1.829
+  },
+  {
+   "text": "cables,",
+   "start": 1.86,
+   "end": 2.305
+  },
+  {
+   "text": "one",
+   "start": 2.355,
+   "end": 2.639
+  },
+  {
+   "text": "magnetic",
+   "start": 2.67,
+   "end": 3.156
+  },
+  {
+   "text": "strip,",
+   "start": 3.21,
+   "end": 3.615
+  },
+  {
+   "text": "ten",
+   "start": 3.66,
+   "end": 3.944
+  },
+  {
+   "text": "seconds.",
+   "start": 3.975,
+   "end": 4.461
+  },
+  {
+   "text": "Tap",
+   "start": 4.515,
+   "end": 4.799
+  },
+  {
+   "text": "the",
+   "start": 4.83,
+   "end": 5.114
+  },
+  {
+   "text": "link.",
+   "start": 5.145,
+   "end": 5.51
+  }
+ ],
+ "music": {
+  "src": "demo/music.mp3",
+  "volume": 0.12
+ },
+ "hook": {
+  "text": "My desk was chaos",
+  "end": 2.2
+ },
+ "callouts": [
+  {
+   "text": "Holds 6 cables",
+   "start": 2.8,
+   "end": 4.8,
+   "y": 0.3
+  },
+  {
+   "text": "No tools needed",
+   "start": 5.0,
+   "end": 6.8,
+   "y": 0.38
+  }
+ ],
+ "captions": {
+  "y": 0.64,
+  "maxWords": 3
+ },
+ "endCard": {
+  "headline": "Tidy desk in 10 seconds",
+  "cta": "Shop now",
+  "image": "demo/product.png",
+  "price": "$29.99",
+  "badge": "Ships from the US in 3-5 days",
+  "duration": 1.8
+ },
+ "progressBar": true
+}

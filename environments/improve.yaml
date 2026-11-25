@@ -1,0 +1,15 @@
+# Sandbox for the weekly IMPROVE loop (self-improver). Needs the gateway, and read access to model
+# vendors and ad-policy pages for model scouting and policy-change checks.
+name: dropship-improve
+config:
+  type: cloud
+  networking:
+    type: limited
+    allowed_hosts:
+      - YOUR_PROJECT_REF.supabase.co
+      - fal.ai
+      - docs.fal.ai
+      - www.facebook.com
+      - transparency.meta.com
+      - ads.tiktok.com
+      - support.google.com

@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  .ad { background: radial-gradient(circle at 50% 40%, #2c3550, var(--bg) 72%); text-align: center; }
+  .headline { position: absolute; top: 6vh; left: 6vw; right: 6vw; font-size: 8.2vw; }
+  .products { position: absolute; top: 22vh; left: 0; right: 0; height: 36vh; display: flex; justify-content: center; align-items: center; }
+  .products img { height: 100%; width: 44vw; object-fit: contain; filter: drop-shadow(0 3vw 4vw rgba(0,0,0,.5)); }
+  .products img + img { margin-left: -12vw; transform: rotate(8deg); }
+  .badge { position: absolute; top: 20vh; right: 6vw; }
+  .pricing { position: absolute; top: 62vh; left: 6vw; right: 6vw; }
+  .note { margin-top: 1.4vh; font-weight: 600; font-size: 3.8vw; color: var(--muted); }
+  .cta { position: absolute; left: 6vw; right: 6vw; bottom: 5vh; }
+</style></head>
+<body><div class="ad">
+  <div class="headline" data-html="headline"></div>
+  <div class="products"><img data-src="product" alt=""><img data-src="product2" alt=""></div>
+  <div class="badge" data-html="badge"></div>
+  <div class="pricing"><span class="compare" data-text="compareAt"></span><span class="price" data-text="price"></span><div class="note" data-text="note"></div></div>
+  <div class="cta" data-text="cta"></div>
+</div><script>
+(() => {
+  const P = window.PROPS || {};
+  if (!P.product2) { const imgs = document.querySelectorAll('.products img'); if (imgs[1]) imgs[1].remove(); }
+})();
+</script></body></html>

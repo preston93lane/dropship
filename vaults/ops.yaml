@@ -1,0 +1,4 @@
+# Container only. Credentials are added with `ant beta:vaults:credentials create` (see docs/07-setup.md)
+# and are never stored in this repo. Each credential is an environment_variable scoped to exact hosts.
+type: vault
+display_name: dropship-ops

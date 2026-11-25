@@ -1,0 +1,22 @@
+{
+  "name": "dropship-motion",
+  "private": true,
+  "description": "Remotion templates for short-form product ads (AdVideo, ProductShowcase, KineticHook).",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts",
+    "still": "remotion still src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.540",
+    "@remotion/google-fonts": "4.0.540",
+    "react": "19.1.10",
+    "react-dom": "19.1.10",
+    "remotion": "4.0.540"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "typescript": "^5.9.3"
+  }
+}

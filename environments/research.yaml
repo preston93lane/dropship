@@ -1,0 +1,8 @@
+# Sandbox for research sessions (product-analyst + trend-scout).
+# Research must read arbitrary sites (TikTok, Amazon, AliExpress, CJ, Google Trends, Reddit...), so
+# networking is unrestricted. The vault for this environment holds ONLY a research-scoped gateway key
+# (read/research/report - no "actions"), so a prompt-injected page cannot spend money.
+name: dropship-research
+config:
+  type: cloud
+  networking: {type: unrestricted}

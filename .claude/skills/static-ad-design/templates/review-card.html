@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  /* ONLY for real, verifiable customer reviews quoted verbatim (FTC Consumer Review Rule). */
+  .ad { background: linear-gradient(160deg, #f6f3ea, #e9e3d3); color: #151515; }
+  .card { position: absolute; left: 6vw; right: 6vw; top: 8vh; background: #fff; border-radius: 4vw; padding: 6vw; box-shadow: 0 3vw 8vw rgba(0,0,0,.12); }
+  .quote { font-weight: 800; font-size: 6.4vw; line-height: 1.18; letter-spacing: -0.01em; margin: 2.5vh 0; text-wrap: pretty; }
+  .who { font-weight: 700; font-size: 3.8vw; color: #555; }
+  .verified { color: #1a8f4c; font-weight: 800; margin-left: 1.5vw; }
+  .product { position: absolute; right: 6vw; bottom: 15vh; width: 50vw; height: 30vh; }
+  .count { position: absolute; left: 6vw; bottom: 17vh; font-weight: 800; font-size: 4.4vw; color: #333; max-width: 38vw; }
+  .cta { position: absolute; left: 6vw; right: 6vw; bottom: 5vh; background: #151515; color: #fff; }
+</style></head>
+<body><div class="ad">
+  <div class="card"><div class="stars" data-stars="rating"></div><div class="quote" data-text="quote"></div><div class="who"><span data-text="reviewer"></span><span class="verified" data-if="verified">✓ Verified buyer</span></div></div>
+  <div class="count" data-text="reviewSummary"></div>
+  <img class="product" data-src="product" alt="">
+  <div class="cta" data-text="cta"></div>
+</div><script></script></body></html>

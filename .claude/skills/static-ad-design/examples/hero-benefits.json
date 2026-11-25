@@ -1,0 +1,10 @@
+{
+  "headline": "Your desk, *finally* tidy",
+  "subhead": "One magnetic strip. Six cables. Ten seconds.",
+  "background": "scene-demo.jpg",
+  "product": "product-demo.png",
+  "benefits": ["Snaps on in seconds", "Holds 6 cables", "No tools, no residue"],
+  "badge": "2 for\n$49",
+  "cta": "Shop now →",
+  "theme": {"accent": "#FFE14D"}
+}

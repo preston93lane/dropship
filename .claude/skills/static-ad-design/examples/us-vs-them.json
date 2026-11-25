@@ -1,0 +1,13 @@
+{
+  "headline": "Why it beats *zip ties*",
+  "product": "product-demo.png",
+  "oursLabel": "Ours",
+  "themLabel": "Zip ties",
+  "rows": [
+    {"feature": "Re-route a cable in 1s", "ours": true, "them": false},
+    {"feature": "No cutting, no waste", "ours": true, "them": false},
+    {"feature": "Holds 6 cables", "ours": true, "them": true},
+    {"feature": "Removable, no residue", "ours": true, "them": false}
+  ],
+  "cta": "Get the clean desk →"
+}

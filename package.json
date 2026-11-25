@@ -13,7 +13,7 @@
     "check:edge": "npx --yes deno@2.9.6 check --node-modules-dir=none supabase/functions/gateway/index.ts supabase/functions/guardian/index.ts",
     "economics": "node --experimental-strip-types --no-warnings scripts/economics.ts",
     "agents:sync-claude-code": "node scripts/sync-claude-code-agents.mjs",
-    "agents:plan": "ant apply --dry-run -v agents",
+    "agents:plan": "ant apply --dry-run -v agents environments vaults memory_stores deployments",
     "proposals:pull": "node scripts/proposals.mjs",
     "dev:gateway": "node --experimental-strip-types --no-warnings scripts/dev-gateway.ts"
   },
