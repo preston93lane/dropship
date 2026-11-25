@@ -35,15 +35,15 @@ carries a hard dollar budget per run.
 Agent loops resend stable context (system prompts, skills, prior turns), so prompt caching usually cuts the
 input cost substantially. Treat $375 as a ceiling for Standard and measure the real figure in week one.
 
-### Media (fal.ai, prepaid; list prices Nov 2026)
+### Media (fal.ai, prepaid; list prices checked on fal's model pages 2026-11-25)
 
 | Unit | Typical recipe | Cost |
 |---|---|---|
-| Finished 15-25s video ad | hook shot 2 takes × 5s on the hero model (~$1.12) + 2 b-roll × 5s standard (~$0.70) + 2 cutouts/edits (~$0.17) + VO + timings (~$0.02) | **~$2-4** |
+| Finished 15-25s video ad | hook shot 2 takes × 5s on the hero model, audio off (~$1.12) + 2 b-roll × 5s standard (~$0.70) + 2 cutouts/edits (~$0.17) + VO + timings (~$0.03) | **~$2-4** |
 | Premium video (native audio shot, premium model) | | ~$5-8 |
 | Static ad (3 sizes) | 1 cutout + 1-2 scene edits + render | **~$0.10-0.30** |
 | Motion-graphic showcase | cutout only + Remotion render | **~$0.01** |
-| AI presenter segment | ~$0.02/s on fal | ~$0.30-0.60 |
+| AI presenter segment (HeyGen on fal, $0.10/s) | 10-25s | ~$1-2.50 |
 
 A 5-creative test batch is about $8-12 of media. Compare: human UGC creators commonly charge $100-300 per video,
 and an agency or freelancer static runs $25-75.

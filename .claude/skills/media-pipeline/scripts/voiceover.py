@@ -21,7 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import download, estimate_cost, find_model, http_json, log, log_cost, media_duration, placeholder, resolve_endpoint  # noqa: E402
-from fal_run import collect_urls  # noqa: E402
+from fal_run import collect_urls, queue_urls  # noqa: E402
 
 WPS = 2.8  # natural ad VO pace, words per second
 
@@ -32,8 +32,9 @@ def fal_sync(endpoint: str, payload: dict) -> dict:
     headers = {"authorization": f"Key {os.environ['FAL_KEY']}"}
     sub = http_json("POST", f"https://queue.fal.run/{endpoint}", payload, headers)
     rid = sub["request_id"]
-    status_url = sub.get("status_url") or f"https://queue.fal.run/{endpoint}/requests/{rid}/status"
-    response_url = sub.get("response_url") or f"https://queue.fal.run/{endpoint}/requests/{rid}"
+    fallback_status, fallback_response = queue_urls(endpoint, rid)
+    status_url = sub.get("status_url") or fallback_status
+    response_url = sub.get("response_url") or fallback_response
     for _ in range(300):
         st = http_json("GET", status_url, None, headers).get("status")
         if st == "COMPLETED":

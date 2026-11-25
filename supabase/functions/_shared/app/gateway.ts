@@ -13,7 +13,12 @@ import { evaluateAd } from "../core/rules.ts";
 import { allocateBudget } from "../core/allocation.ts";
 import { assertCreativeTransition, assertProductTransition, PRODUCT_OWNER, type CreativeStatus, type ProductStatus } from "../core/lifecycle.ts";
 import type { Ad, Campaign, Creative, MetricsRow, Product, Repo, Row } from "../repo/types.ts";
-import { decideAction, HttpError, submitAction, type Deps } from "./actions.ts";
+import { decideAction, engageKillSwitch, HttpError, submitAction, type Deps } from "./actions.ts";
+import { buildSummary } from "./summary.ts";
+import { computePnl } from "./pnl.ts";
+import { creativeInsights } from "./insights.ts";
+import { handleTelegramUpdate, type TelegramUpdate } from "./telegram.ts";
+import { ingestShopifyOrder, verifyShopifyHmac, type ShopifyOrder } from "./shopify-webhooks.ts";
 import { runGuardian } from "./guardian.ts";
 import {
   AGENT_WRITABLE_SETTINGS,
@@ -38,6 +43,10 @@ export interface GatewayConfig {
   agentKeys?: Record<string, Scope[]>;
   adminKey: string;
   cronSecret: string;
+  /** Telegram webhook secret (sent by Telegram in X-Telegram-Bot-Api-Secret-Token). Enables /telegram/webhook. */
+  telegramSecret?: string;
+  /** Shopify webhook signing secret. Enables /shopify/webhook (orders/create, orders/updated). */
+  shopifyWebhookSecret?: string;
   /** Minimum approved creatives before a product can move to ready_to_test. */
   minCreativesToTest?: number;
 }
@@ -154,31 +163,9 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
   }
 
   const routes: [string, RegExp, Handler][] = [
-    ["GET", /^\/v1\/summary$/, async () => {
-      const guardrails = await loadGuardrails(repo);
-      const products = await repo.list<Product>("products", { limit: 2000 });
-      const counts: Record<string, number> = {};
-      for (const p of products) counts[p.status] = (counts[p.status] ?? 0) + 1;
-      const active = await repo.list<Campaign>("campaigns", { eq: { status: "active" } });
-      const pending = await repo.list("actions", { eq: { status: "pending_approval" } });
-      const today = deps.now().toISOString().slice(0, 10);
-      const metrics = await repo.list<MetricsRow>("ad_metrics_daily", { eq: { date: today } });
-      const openBriefs = await repo.list("creative_briefs", { eq: { status: "open" } });
-      const inReview = await repo.list("creatives", { eq: { status: "in_review" } });
-      return json({
-        guardrails,
-        dry_run: deps.integrations.dryRun,
-        products_by_status: counts,
-        next_owner_by_status: PRODUCT_OWNER,
-        active_campaigns: active.length,
-        committed_daily_budget: active.reduce((s, c) => s + Number(c.daily_budget), 0),
-        spend_today: Math.round(metrics.reduce((s, m) => s + Number(m.spend), 0) * 100) / 100,
-        revenue_today: Math.round(metrics.reduce((s, m) => s + Number(m.revenue), 0) * 100) / 100,
-        pending_approvals: pending.length,
-        open_briefs: openBriefs.length,
-        creatives_in_review: inReview.length,
-      });
-    }],
+    ["GET", /^\/v1\/summary$/, async () => json(await buildSummary(deps))],
+    ["GET", /^\/v1\/pnl$/, async ({ url }) => json(await computePnl(repo, deps.now(), Math.min(90, Math.max(1, Number(url.searchParams.get("days") ?? 7)))))],
+    ["GET", /^\/v1\/insights\/creatives$/, async ({ url }) => json(await creativeInsights(repo, { minSpend: Number(url.searchParams.get("min_spend") ?? 5) }))],
 
     ["POST", /^\/v1\/economics$/, async ({ body }) => {
       const b = await body();
@@ -309,8 +296,28 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
       const b = await body();
       const verdict = String(b.verdict);
       if (!["pass", "fail", "revise"].includes(verdict)) throw new HttpError(400, "verdict must be pass | fail | revise");
-      const compliance = { verdict, issues: b.issues ?? [], notes: b.notes ?? null, checklist: b.checklist ?? null, reviewer: actor, reviewed_at: deps.now().toISOString() };
-      const status = verdict === "pass" ? "approved" : "rejected";
+      let finalVerdict = verdict;
+      let judge: unknown = null;
+      let issues = (Array.isArray(b.issues) ? b.issues : []) as unknown[];
+      if (verdict === "pass" && deps.complianceJudge) {
+        // Separation of duties: an independent model must also pass it. Fail closed if it can't run.
+        const product = await repo.get<Product>("products", c.product_id);
+        if (!product) throw new HttpError(404, "product not found");
+        const isUrl = (u: unknown): u is string => typeof u === "string" && /^https:\/\//.test(u);
+        const frames = [c.format !== "video" ? c.asset_url : null, c.thumbnail_url, ...(Array.isArray(b.frames) ? b.frames : [])].filter(isUrl).slice(0, 8);
+        try {
+          const j = await deps.complianceJudge.review({ creative: c, product, frames });
+          judge = j;
+          if (j.verdict !== "pass") {
+            finalVerdict = j.verdict;
+            issues = [...issues, ...j.issues.map((i) => ({ ...i, source: "independent-judge" }))];
+          }
+        } catch (e) {
+          throw new HttpError(503, "independent compliance judge unavailable; the creative stays in review (retry later): " + (e instanceof Error ? e.message : String(e)));
+        }
+      }
+      const compliance = { verdict: finalVerdict, agent_verdict: verdict, judge, issues, notes: b.notes ?? null, checklist: b.checklist ?? null, reviewer: actor, reviewed_at: deps.now().toISOString() };
+      const status = finalVerdict === "pass" ? "approved" : "rejected";
       return json(await repo.update("creatives", c.id, { compliance, status }));
     }],
 
@@ -497,11 +504,7 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
         maxActiveTestingProducts: num("maxActiveTestingProducts", g.maxActiveTestingProducts),
       };
       await repo.setSetting("guardrails", next, "human", "console");
-      if (next.killSwitch && !g.killSwitch) {
-        for (const c of await repo.list<Campaign>("campaigns", { eq: { status: "active" } })) {
-          await submitAction(deps, { type: "ads.pause", payload: { campaign_id: c.id, reason: "manual kill switch" }, requested_by: "human" });
-        }
-      }
+      if (next.killSwitch && !g.killSwitch) await engageKillSwitch(deps, "human", "manual kill switch (console)");
       return back();
     }
     if (req.method === "POST" && path === "/console/guardian") {
@@ -509,7 +512,7 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
       return back();
     }
     if (req.method === "GET" && (path === "/console" || path === "/console/")) {
-      const [guardrails, pending, recentActions, decisions, proposals, reports, products] = await Promise.all([
+      const [guardrails, pending, recentActions, decisions, proposals, reports, products, pnl] = await Promise.all([
         loadGuardrails(repo),
         repo.list("actions", { eq: { status: "pending_approval" }, order: { column: "created_at", ascending: false } }),
         repo.list("actions", { order: { column: "created_at", ascending: false }, limit: 25 }),
@@ -517,8 +520,9 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
         repo.list("proposals", { eq: { status: "open" }, order: { column: "created_at", ascending: false } }),
         repo.list("reports", { order: { column: "created_at", ascending: false }, limit: 1 }),
         repo.list<Product>("products", { order: { column: "updated_at", ascending: false }, limit: 200 }),
+        computePnl(repo, deps.now(), 7),
       ]);
-      const html = renderConsole({ guardrails, dryRun: deps.integrations.dryRun, pending, recentActions, decisions, proposals, latestReport: reports[0] ?? null, products });
+      const html = renderConsole({ guardrails, dryRun: deps.integrations.dryRun, pending, recentActions, decisions, proposals, latestReport: reports[0] ?? null, products, pnl });
       return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     }
     return json({ error: "not found" }, 404);
@@ -531,6 +535,24 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
     try {
       if (path === "/v1/health") return json({ ok: true, dry_run: deps.integrations.dryRun, time: deps.now().toISOString() });
       if (path.startsWith("/console")) return await handleConsole(req, path);
+      if (path === "/telegram/webhook" && req.method === "POST") {
+        if (!cfg.telegramSecret || !safeEqual(req.headers.get("x-telegram-bot-api-secret-token") ?? "", cfg.telegramSecret)) return json({ error: "unauthorized" }, 401);
+        try {
+          await handleTelegramUpdate(deps, (await req.json()) as TelegramUpdate);
+        } catch (e) {
+          console.error("telegram update failed", e); // 200 anyway: Telegram would otherwise retry the same update forever
+        }
+        return json({ ok: true });
+      }
+      if (path === "/shopify/webhook" && req.method === "POST") {
+        const raw = await req.text();
+        if (!cfg.shopifyWebhookSecret || !(await verifyShopifyHmac(raw, req.headers.get("x-shopify-hmac-sha256") ?? "", cfg.shopifyWebhookSecret))) {
+          return json({ error: "invalid signature" }, 401);
+        }
+        const topic = req.headers.get("x-shopify-topic") ?? "";
+        if (topic !== "orders/create" && topic !== "orders/updated") return json({ ignored: topic });
+        return json({ rows: await ingestShopifyOrder(repo, JSON.parse(raw) as ShopifyOrder) });
+      }
       if (path === "/v1/guardian/run" && req.method === "POST") {
         if (!safeEqual(req.headers.get("x-cron-secret") ?? "", cfg.cronSecret) && !isAdmin(req)) return json({ error: "unauthorized" }, 401);
         return json(await runGuardian(deps));

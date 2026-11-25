@@ -15,10 +15,12 @@ import type {
   ExternalIds,
   Integrations,
   Notifier,
+  NotifyOptions,
   SampleOrderInput,
   StoreAdapter,
   StoreProductInput,
   SupplierAdapter,
+  TelegramApi,
 } from "./types.ts";
 
 const fakeId = (prefix: string) => `dry_${prefix}_${crypto.randomUUID().slice(0, 8)}`;
@@ -116,34 +118,51 @@ export class CjSupplier implements SupplierAdapter {
 
 export class ConsoleNotifier implements Notifier {
   readonly sent: string[] = [];
-  async send(text: string) {
+  readonly buttons: { text: string; data: string }[][] = [];
+  async send(text: string, opts: NotifyOptions = {}) {
     this.sent.push(text);
+    if (opts.buttons) this.buttons.push(opts.buttons);
     console.log(`[notify] ${text}`);
   }
 }
 
-/** Telegram bot + optional generic webhook (Slack/Discord-compatible {text}). Free and phone-friendly. */
+export class TelegramBot implements TelegramApi {
+  readonly chatId: string;
+  private readonly token: string;
+  constructor(token: string, chatId: string) {
+    this.token = token;
+    this.chatId = chatId;
+  }
+  private call(method: string, body: Record<string, unknown>) {
+    return requestJson("https://api.telegram.org/bot" + this.token + "/" + method, { method: "POST", json: body }, { retries: 1, label: "telegram " + method });
+  }
+  async sendMessage(text: string, buttons?: { text: string; data: string }[]) {
+    const markup = buttons && buttons.length ? { reply_markup: { inline_keyboard: [buttons.map((b) => ({ text: b.text, callback_data: b.data.slice(0, 64) }))] } } : {};
+    await this.call("sendMessage", { chat_id: this.chatId, text: text.slice(0, 4000), disable_web_page_preview: true, ...markup });
+  }
+  async answerCallback(callbackQueryId: string, text: string) {
+    await this.call("answerCallbackQuery", { callback_query_id: callbackQueryId, text: text.slice(0, 190) });
+  }
+  async editMessage(chatId: string | number, messageId: number, text: string) {
+    await this.call("editMessageText", { chat_id: chatId, message_id: messageId, text: text.slice(0, 4000) });
+  }
+}
+
+/** Telegram bot (with one-tap approve/reject buttons) + optional generic webhook (Slack/Discord-compatible {text}). */
 export class MultiNotifier implements Notifier {
-  private readonly tg?: { token: string; chatId: string };
+  private readonly tg?: TelegramApi;
   private readonly webhook?: string;
-  constructor(tg?: { token: string; chatId: string }, webhook?: string) {
+  constructor(tg?: TelegramApi, webhook?: string) {
     if (tg) this.tg = tg;
     if (webhook) this.webhook = webhook;
   }
-  async send(text: string, opts: { severity?: "info" | "warn" | "critical"; link?: string } = {}) {
+  async send(text: string, opts: NotifyOptions = {}) {
     const icon = opts.severity === "critical" ? "🚨" : opts.severity === "warn" ? "⚠️" : "🤖";
-    const msg = `${icon} ${text}${opts.link ? `\n${opts.link}` : ""}`;
+    const msg = icon + " " + text + (opts.link ? "\n" + opts.link : "");
     const jobs: Promise<unknown>[] = [];
-    if (this.tg) {
-      jobs.push(
-        requestJson(`https://api.telegram.org/bot${this.tg.token}/sendMessage`, {
-          method: "POST",
-          json: { chat_id: this.tg.chatId, text: msg.slice(0, 4000), disable_web_page_preview: true },
-        }, { retries: 1, label: "telegram" }),
-      );
-    }
+    if (this.tg) jobs.push(this.tg.sendMessage(msg, opts.buttons));
     if (this.webhook) jobs.push(requestJson(this.webhook, { method: "POST", json: { text: msg } }, { retries: 1, label: "webhook" }));
-    if (jobs.length === 0) console.log(`[notify] ${msg}`);
+    if (jobs.length === 0) console.log("[notify] " + msg);
     await Promise.allSettled(jobs);
   }
 }
@@ -189,7 +208,8 @@ export function buildIntegrations(env: (k: string) => string | undefined): Integ
 
   const tgToken = env("TELEGRAM_BOT_TOKEN");
   const tgChat = env("TELEGRAM_CHAT_ID");
-  const notifier = new MultiNotifier(tgToken && tgChat ? { token: tgToken, chatId: tgChat } : undefined, env("NOTIFY_WEBHOOK_URL"));
+  const telegram = tgToken && tgChat ? new TelegramBot(tgToken, tgChat) : undefined;
+  const notifier = new MultiNotifier(telegram, env("NOTIFY_WEBHOOK_URL"));
 
   const integrations: Integrations = {
     dryRun,
@@ -197,6 +217,7 @@ export function buildIntegrations(env: (k: string) => string | undefined): Integ
     store,
     supplier,
     notifier,
+    ...(telegram ? { telegram } : {}),
     publications: {
       ...(env("SHOPIFY_ONLINE_STORE_PUBLICATION_ID") ? { onlineStore: env("SHOPIFY_ONLINE_STORE_PUBLICATION_ID")! } : {}),
       ...(env("SHOPIFY_TIKTOK_PUBLICATION_ID") ? { tiktok: env("SHOPIFY_TIKTOK_PUBLICATION_ID")! } : {}),

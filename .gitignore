@@ -14,3 +14,5 @@ supabase/.branches/
 .claude/settings.local.json
 .claude/skills/motion-graphics/remotion/public/demo/
 .claude/skills/static-ad-design/out/
+__pycache__/
+*.pyc

@@ -35,12 +35,14 @@ Keys are scoped per loop: research keys cannot submit actions, creative keys can
 | `POST /v1/products/:id/score` | research | Compute economics + score + verdict from stored components/supplier/flags |
 | `GET/POST /v1/briefs`, `PATCH /v1/briefs/:id` | read/creative | Creative briefs (`?status=open`) |
 | `GET/POST /v1/creatives`, `PATCH /v1/creatives/:id` | read/creative | Register creatives, move status (`in_production → in_review`) |
-| `POST /v1/creatives/:id/compliance` | creative | Compliance verdict `{verdict: pass|revise|fail, issues[], checklist}`. The only way a creative becomes `approved` |
+| `POST /v1/creatives/:id/compliance` | creative | Compliance verdict `{verdict: pass|revise|fail, issues[], checklist, frames[]}`. The only way a creative becomes `approved`. When the gateway's independent judge is on, a `pass` is re-checked by a separate model using `frames` (public https keyframe URLs) + the thumbnail; both must pass. `503` = judge unavailable, the creative stays `in_review`: retry later |
 | `POST /v1/assets/sign` | creative | `{path}` → signed upload URL + public URL (use `media-pipeline/scripts/upload.py`) |
 | `POST /v1/actions` | actions | Request a side effect (below) |
 | `GET /v1/actions?status=`, `GET /v1/actions/:id` | read | Action queue and results |
 | `GET /v1/performance?product_id=` | read | Per-ad lifetime stats + the guardian rule's current verdict for each ad |
 | `GET /v1/allocation` | read | Thompson-sampling budget suggestion across live campaigns |
+| `GET /v1/pnl?days=7` | read | P&L by day and product: ad spend, store revenue/orders/refunds (Shopify webhooks), product+shipping, fees, contribution after ads, machine cost, net, platform-vs-store attribution ratio. `contribution_source` says `store` or `modeled` |
+| `GET /v1/insights/creatives?min_spend=5` | read | Performance grouped by format, style, hook_type, angle, concept_family, aspect, ai_generated + top creatives. Read it before planning a batch |
 | `GET /v1/decisions?since=ISO` | read | Guardian decision log |
 | `POST /v1/runs`, `PATCH /v1/runs/:id` | report | Open/close your loop run (`status`, `summary`, `llm_cost`, `media_cost`) |
 | `POST /v1/costs` | report | `{category: media|research|samples|..., vendor, amount, ref}` |

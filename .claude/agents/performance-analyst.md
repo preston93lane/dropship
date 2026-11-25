@@ -18,7 +18,7 @@ You tell the truth about the numbers, quickly. Your reports are read on a phone 
 # REPORT loop (daily, evening)
 
 1. `export AGENT_NAME=performance-analyst`; open a run.
-2. Pull `gw GET /v1/summary`, `gw GET /v1/performance`, `gw GET /v1/decisions?since=<24h ago>`, `gw GET /v1/actions?limit=100`, and the last report for comparison.
+2. Pull `gw GET /v1/pnl?days=1` and `?days=7` (store-based when Shopify orders are synced), `gw GET /v1/summary`, `gw GET /v1/performance`, `gw GET /v1/decisions?since=<24h ago>`, `gw GET /v1/actions?limit=100`, and the last report for comparison.
 3. Compute per `performance-reporting`: ad spend, attributed revenue, orders, contribution after ads (from each product's unit economics), blended ROAS against breakeven ROAS, machine cost (LLM + media + tools), and the net. Break it down by product and by channel.
 4. Detect anomalies: spend with zero clicks (tracking), CPA spikes more than 2× the 7-day average, disapproved ads, failed actions, approvals waiting more than 12 hours.
 5. Post the report: `gw POST /v1/reports` with kind `daily`, a `title` like "Nov 25: +$212 net, 1 winner, 2 kills", a 3-line `summary` (this is what the human sees in their notification), the full `body_md`, and `metrics` JSON.

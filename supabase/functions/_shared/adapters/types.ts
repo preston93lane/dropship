@@ -87,8 +87,23 @@ export interface SupplierAdapter {
   orderSample(input: SampleOrderInput): Promise<{ orderId: string }>;
 }
 
+export interface NotifyOptions {
+  severity?: "info" | "warn" | "critical";
+  link?: string;
+  /** One-tap buttons (Telegram inline keyboard). `data` comes back in the webhook callback. */
+  buttons?: { text: string; data: string }[];
+}
+
 export interface Notifier {
-  send(text: string, opts?: { severity?: "info" | "warn" | "critical"; link?: string }): Promise<void>;
+  send(text: string, opts?: NotifyOptions): Promise<void>;
+}
+
+/** Telegram Bot API calls the gateway needs to answer button presses and commands. */
+export interface TelegramApi {
+  readonly chatId: string;
+  sendMessage(text: string, buttons?: { text: string; data: string }[]): Promise<void>;
+  answerCallback(callbackQueryId: string, text: string): Promise<void>;
+  editMessage(chatId: string | number, messageId: number, text: string): Promise<void>;
 }
 
 export interface Integrations {
@@ -97,6 +112,7 @@ export interface Integrations {
   store: StoreAdapter;
   supplier: SupplierAdapter;
   notifier: Notifier;
+  telegram?: TelegramApi;
   publications: { onlineStore?: string; tiktok?: string };
   /** Optional hook to wake a Managed Agents deployment early (e.g. creative fatigue on a winner). */
   triggerLoop?: (loop: string, reason: string) => Promise<void>;

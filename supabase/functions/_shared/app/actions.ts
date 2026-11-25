@@ -7,12 +7,15 @@ import { unitEconomics } from "../core/economics.ts";
 import type { Integrations, StoreProductInput } from "../adapters/types.ts";
 import type { ActionRow, Ad, Campaign, Creative, Product, Repo, Row } from "../repo/types.ts";
 import { loadEconomicsDefaults, loadGuardrails } from "./settings.ts";
+import type { ComplianceJudge } from "./compliance.ts";
 
 export interface Deps {
   repo: Repo;
   integrations: Integrations;
   now: () => Date;
   consoleUrl?: string;
+  /** Independent server-side compliance check (see compliance.ts). Optional. */
+  complianceJudge?: ComplianceJudge;
 }
 
 export interface SubmitInput {
@@ -139,12 +142,54 @@ export async function submitAction(deps: Deps, input: SubmitInput): Promise<Acti
 
   if (status === "approved") return executeAction(deps, row);
   if (status === "pending_approval") {
-    await integrations.notifier.send(
-      `Approval needed: ${type} requested by ${input.requested_by}${input.rationale ? ` — ${input.rationale}` : ""}`,
-      deps.consoleUrl ? { severity: "warn", link: deps.consoleUrl } : { severity: "warn" },
-    );
+    const why = input.rationale ? ": " + input.rationale : "";
+    await integrations.notifier.send("Approval needed: " + describeAction(type, payload) + "\nRequested by " + input.requested_by + why, {
+      severity: "warn",
+      ...(deps.consoleUrl ? { link: deps.consoleUrl } : {}),
+      buttons: [
+        { text: "✅ Approve", data: "a:" + row.id },
+        { text: "❌ Reject", data: "r:" + row.id },
+      ],
+    });
   }
   return row;
+}
+
+/** Emergency stop: kill switch on (blocks every spend-increasing action) and pause all active campaigns. */
+export async function engageKillSwitch(deps: Deps, by: string, reason: string): Promise<number> {
+  const g = await loadGuardrails(deps.repo);
+  if (!g.killSwitch) await deps.repo.setSetting("guardrails", { ...g, killSwitch: true }, by, reason);
+  const active = await deps.repo.list<Campaign>("campaigns", { eq: { status: "active" } });
+  for (const c of active) {
+    await submitAction(deps, { type: "ads.pause", payload: { campaign_id: c.id, reason }, requested_by: by, rationale: "kill switch: " + reason });
+  }
+  return active.length;
+}
+
+/** One human-readable line for approval messages (what will happen, with the money involved). */
+export function describeAction(type: string, p: Row): string {
+  const money = (n: unknown) => (typeof n === "number" ? "$" + n.toFixed(2) : "?");
+  const short = (v: unknown) => String(v ?? "").slice(0, 8);
+  switch (type) {
+    case "ads.activate":
+      return "start spending on campaign " + short(p.campaign_id) + " at " + money(p.dailyBudget) + "/day";
+    case "ads.set_budget":
+      return "change daily budget " + money(p.currentDailyBudget) + " -> " + money(p.dailyBudget) + " (campaign " + short(p.campaign_id) + ")";
+    case "ads.create_test":
+      return "create a paused " + String(p.channel) + " test at " + money(p.dailyBudget) + "/day";
+    case "ads.scale_duplicate":
+      return "duplicate a winning ad into a scaling campaign at " + money(p.dailyBudget) + "/day";
+    case "shopify.publish_product":
+      return "publish the product page (make it live)";
+    case "shopify.set_price":
+      return "change price " + money(p.currentPrice) + " -> " + money(p.price);
+    case "supplier.order_sample":
+      return "order a supplier sample (~" + money(p.cost) + ")";
+    case "tiktok_shop.list_product":
+      return "list the product on TikTok Shop";
+    default:
+      return type;
+  }
 }
 
 export async function decideAction(deps: Deps, id: string, approve: boolean, by: string, note?: string): Promise<ActionRow> {
@@ -236,7 +281,11 @@ async function run(deps: Deps, type: ActionType, p: Row, row: ActionRow): Promis
       const product = await mustGet<Product>(repo, "products", p.product_id);
       const adapter = adsFor(deps, p.channel);
       const ids = p.creative_ids as string[];
-      const creatives = await Promise.all(ids.map((id) => mustGet<Creative>(repo, "creatives", id)));
+      let creatives = await Promise.all(ids.map((id) => mustGet<Creative>(repo, "creatives", id)));
+      if (adapter.channel === "tiktok") {
+        creatives = creatives.filter((c) => c.format === "video");
+        if (creatives.length === 0) throw new HttpError(400, "TikTok tests need video creatives (render statics as slideshow videos first)");
+      }
       const landingUrl = (p.landing_url as string | undefined) ?? (product.shopify_handle ? integrations.store.productUrl(product.shopify_handle) : undefined);
       if (!landingUrl) throw new HttpError(409, "no landing_url and product has no Shopify handle");
       const name = (p.name as string | undefined) ?? `T | ${product.title.slice(0, 40)} | ${ts.slice(0, 10)}`;

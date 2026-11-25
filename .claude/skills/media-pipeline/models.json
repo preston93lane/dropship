@@ -1,31 +1,32 @@
 {
-  "_note": "Media model registry (fal.ai endpoints). Prices are list prices researched Nov 2026 from fal pricing roundups and MUST be re-verified weekly by the self-improver (model-scouting skill). Endpoint ids marked verify:true have not been confirmed against fal's live model pages. The gateway setting `model_registry` overrides this file when present.",
+  "_note": "Media model registry (fal.ai). Endpoints and list prices were checked against fal's live model pages on 2026-11-25 (verified_on). 'image_field' is the model's name for the start/reference image: fal_run.py maps a generic image_url/image_urls onto it. 'defaults' are applied when the caller doesn't set them (e.g. audio OFF, because several models default to audio ON at a higher price). Entries with verify:true still have unconfirmed input names: check https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=<endpoint> before relying on them. The gateway setting `model_registry` overrides this file when present; the self-improver re-checks weekly (model-scouting).",
   "updated": "2026-11-25",
   "video": {
-    "budget_i2v":   {"endpoint": "fal-ai/minimax/h3-max-turbo/image-to-video", "unit": "second", "price": 0.04, "audio": false, "use": "cheap b-roll, drafts, lifestyle scene motion", "verify": true},
-    "standard_i2v": {"endpoint": "fal-ai/kling-video/v2.6/pro/image-to-video", "unit": "second", "price": 0.07, "price_with_audio": 0.14, "use": "default product b-roll and hook shots", "verify": true},
-    "hero_i2v":     {"endpoint": "fal-ai/kling-video/v3/pro/image-to-video", "unit": "second", "price": 0.112, "price_with_audio": 0.168, "use": "hero/hook shot where product fidelity and motion quality matter most", "verify": true},
-    "premium_i2v":  {"endpoint": "fal-ai/kling-video/v4/image-to-video", "unit": "second", "price": 0.157, "use": "premium hero shots when standard models fail fidelity", "verify": true},
-    "native_audio": {"endpoint": "fal-ai/bytedance/seedance/v2/image-to-video", "unit": "second", "price": 0.303, "use": "scenes needing synchronized ambient sound or speech", "verify": true},
-    "open_weights": {"endpoint": "fal-ai/wan/v3/image-to-video", "unit": "second", "price": 0.10, "use": "fallback when proprietary models refuse or are down", "verify": true},
-    "presenter":    {"endpoint": "fal-ai/heygen/avatar-video", "unit": "second", "price": 0.02, "use": "AI presenter / talking-head explainer (never a fake customer)", "verify": true}
+    "budget_i2v":   {"endpoint": "minimax/h3-max-turbo/image-to-video", "unit": "second", "price": 0.04, "use": "cheap b-roll, drafts, lifestyle scene motion (768p)", "image_field": "image_url", "verify": true, "verified_on": "2026-11-25", "notes": "price 768p; 480p $0.025/s, 1080p $0.08/s"},
+    "standard_i2v": {"endpoint": "fal-ai/kling-video/v2.6/pro/image-to-video", "unit": "second", "price": 0.07, "price_with_audio": 0.14, "use": "default product b-roll and hook shots", "image_field": "start_image_url", "defaults": {"generate_audio": false, "duration": "5"}, "verify": true, "verified_on": "2026-11-25", "notes": "duration 5 or 10"},
+    "hero_i2v":     {"endpoint": "fal-ai/kling-video/v3/pro/image-to-video", "unit": "second", "price": 0.112, "price_with_audio": 0.168, "use": "hero/hook shot where product fidelity and motion quality matter most", "image_field": "start_image_url", "defaults": {"generate_audio": false, "duration": "5"}, "verify": false, "verified_on": "2026-11-25", "notes": "duration '3'-'15' (string); generate_audio defaults TRUE on fal, so keep the default here false; aspect comes from the start image"},
+    "premium_i2v":  {"endpoint": "kling/v4/image-to-video", "unit": "second", "price": 0.157, "use": "premium hero shots when standard models fail fidelity (720p)", "image_field": "start_image_url", "verify": true, "verified_on": "2026-11-25", "notes": "page shows a Private badge: access may be restricted; 1080p $0.235/s"},
+    "native_audio": {"endpoint": "bytedance/seedance-2.0/us/image-to-video", "unit": "second", "price": 0.3024, "use": "scenes needing synchronized ambient sound or speech (720p)", "image_field": "image_url", "verify": true, "verified_on": "2026-11-25", "notes": "US-hosted; 480p $0.14/s, 1080p $0.75/s"},
+    "open_weights": {"endpoint": "alibaba/wan-3.0/image-to-video", "unit": "second", "price": 0.10, "use": "fallback when other models refuse or are down (720p)", "image_field": "image_url", "defaults": {"resolution": "720p"}, "verify": true, "verified_on": "2026-11-25", "notes": "default resolution on fal is 1080p ($0.20/s)"},
+    "presenter":    {"endpoint": "fal-ai/heygen/avatar5/digital-twin", "unit": "second", "price": 0.10, "use": "AI presenter / talking-head explainer (never a fake customer)", "verify": true, "verified_on": "2026-11-25", "notes": "inputs: prompt (script), avatar, voice; returns video.url and caption_file"}
   },
   "image": {
-    "draft":         {"endpoint": "fal-ai/flux/schnell", "unit": "image", "price": 0.003, "use": "throwaway drafts, mood boards", "verify": false},
-    "scene":         {"endpoint": "fal-ai/bytedance/seedream/v5/lite/edit", "unit": "image", "price": 0.035, "use": "lifestyle scene with product reference", "verify": true},
-    "product_edit":  {"endpoint": "fal-ai/nano-banana-2/edit", "unit": "image", "price": 0.08, "use": "reference-faithful product edits: new background, hands, context", "verify": true},
-    "hero":          {"endpoint": "fal-ai/nano-banana-pro/edit", "unit": "image", "price": 0.15, "use": "hero image when product_edit fails fidelity", "verify": true},
-    "remove_bg":     {"endpoint": "fal-ai/birefnet/v2", "unit": "image", "price": 0.005, "use": "product cutouts for motion graphics and statics", "verify": true},
-    "upscale":       {"endpoint": "fal-ai/clarity-upscaler", "unit": "image", "price": 0.03, "use": "upscale low-res supplier photos", "verify": true}
+    "draft":        {"endpoint": "fal-ai/flux/schnell", "unit": "image", "price": 0.003, "use": "throwaway drafts, mood boards (per megapixel)", "verify": false, "verified_on": "2026-11-25"},
+    "scene":        {"endpoint": "fal-ai/bytedance/seedream/v5/lite/edit", "unit": "image", "price": 0.035, "use": "lifestyle scene with product reference", "image_field": "image_urls", "verify": false, "verified_on": "2026-11-25"},
+    "product_edit": {"endpoint": "fal-ai/nano-banana-2/edit", "unit": "image", "price": 0.08, "use": "reference-faithful product edits: new background, hands, context", "image_field": "image_urls", "defaults": {"resolution": "1K"}, "verify": false, "verified_on": "2026-11-25", "notes": "2K = 1.5x, 4K = 2x price"},
+    "hero":         {"endpoint": "fal-ai/nano-banana-pro/edit", "unit": "image", "price": 0.15, "use": "hero image when product_edit fails fidelity", "image_field": "image_urls", "verify": false, "verified_on": "2026-11-25"},
+    "remove_bg":    {"endpoint": "fal-ai/birefnet/v2", "unit": "image", "price": 0.01, "use": "product cutouts for motion graphics and statics", "image_field": "image_url", "verify": false, "verified_on": "2026-11-25", "notes": "page price unclear; estimate kept conservative"},
+    "upscale":      {"endpoint": "fal-ai/clarity-upscaler", "unit": "image", "price": 0.03, "use": "upscale low-res supplier photos (per megapixel)", "image_field": "image_url", "verify": true, "verified_on": "2026-11-25", "notes": "form marks prompt as required"}
   },
   "audio": {
-    "tts":           {"endpoint": "fal-ai/elevenlabs/tts/turbo-v2.5", "unit": "1k_chars", "price": 0.04, "use": "voiceover", "verify": true},
-    "tts_premium":   {"endpoint": "fal-ai/elevenlabs/tts/eleven-v3", "unit": "1k_chars", "price": 0.10, "use": "expressive voiceover for hero ads", "verify": true},
-    "transcribe":    {"endpoint": "fal-ai/elevenlabs/speech-to-text", "unit": "minute", "price": 0.008, "use": "word-level timestamps for captions", "verify": true},
-    "music":         {"endpoint": "fal-ai/elevenlabs/music", "unit": "minute", "price": 0.60, "use": "original background music (royalty-free for ads; check vendor terms)", "verify": true}
+    "tts":          {"endpoint": "fal-ai/elevenlabs/tts/turbo-v2.5", "unit": "1k_chars", "price": 0.05, "use": "voiceover", "verify": true, "verified_on": "2026-11-25", "notes": "voice field name not visible on the page"},
+    "tts_premium":  {"endpoint": "fal-ai/elevenlabs/tts/eleven-v3", "unit": "1k_chars", "price": 0.10, "use": "expressive voiceover for hero ads", "verify": true},
+    "transcribe":   {"endpoint": "fal-ai/elevenlabs/speech-to-text", "unit": "minute", "price": 0.03, "use": "word-level timestamps for captions", "verify": true, "verified_on": "2026-11-25", "notes": "returns words[]; start/end fields not shown in the page sample (voiceover.py falls back to even spacing if absent)"},
+    "music":        {"endpoint": "fal-ai/elevenlabs/music", "unit": "minute", "price": 0.60, "use": "original background music (check vendor commercial terms)", "verify": true}
   },
   "deprecated": [
     {"model": "OpenAI Sora 2 API", "status": "shut down 2026-09-24 per OpenAI deprecation notice", "action": "do not use"},
-    {"model": "Google Veo 3.1 on fal", "status": "reported leaving fal 2026-11-17", "action": "verify; use Kling/Seedance instead"}
+    {"model": "Google Veo 3.1 on fal", "status": "reported leaving fal 2026-11-17", "action": "use Kling/Seedance instead"},
+    {"model": "fal-ai/minimax/..., fal-ai/wan/v3, fal-ai/heygen/avatar-video, fal-ai/bytedance/seedance/v2 (guessed ids)", "status": "404 on 2026-11-25", "action": "use the corrected ids above"}
   ]
 }

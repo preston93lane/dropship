@@ -11,14 +11,14 @@ description: Generate and edit product imagery with AI while keeping the product
 
 | Job | Model key | Approx cost | Notes |
 |---|---|---|---|
-| Cutout (transparent PNG) | `image.remove_bg` | ~$0.005 | For motion graphics, statics and end cards |
+| Cutout (transparent PNG) | `image.remove_bg` | ~$0.01 | For motion graphics, statics and end cards |
 | Upscale a low-res supplier photo | `image.upscale` | ~$0.03 | Before any edit, if source < 1000px |
 | New background / context, product unchanged | `image.product_edit` | ~$0.08 | Default for lifestyle scenes |
 | Lifestyle scene, multiple references | `image.scene` | ~$0.035 | Cheaper; check fidelity carefully |
 | Hero image after fidelity failures | `image.hero` | ~$0.15 | Use sparingly |
 | Mood board / composition drafts | `image.draft` | ~$0.003 | Never used in a final ad |
 
-Run any of them with `media-pipeline/scripts/fal_run.py --model <key> --input @in.json --out <dir>`. Source images must be URLs (upload local files first with `upload.py`). Exact input field names vary by endpoint; check the model's fal page (model-scouting keeps the registry current). Typical fields: `prompt`, `image_url` / `image_urls`, `aspect_ratio`, `num_images`.
+Run any of them with `media-pipeline/scripts/fal_run.py --model <key> --input @in.json --out <dir>`. Source images must be URLs (upload local files first with `upload.py`). Exact input field names vary by endpoint; check the model's fal page (model-scouting keeps the registry current). Pass `prompt` and `image_url` (or `image_urls`); `fal_run.py` maps them onto the model's field. Edit models also take `aspect_ratio` (default auto) and `resolution` (1K default; 2K costs 1.5x).
 
 ## Prompt pattern for edits
 

@@ -150,6 +150,14 @@ test("full loop: research to guardian decisions", async () => {
   assert.equal((await repo.get("products", id))!.status, "winner");
   assert.equal((await repo.list("creative_briefs", { eq: { product_id: id, reason: "iterate_winner" } })).length, 1);
 
+  // Regression: a second guardian run must not re-record or re-notify the pending scale
+  const notified = (deps.integrations.notifier as unknown as { sent: string[] }).sent.length;
+  advance(0.5);
+  const again = await runGuardian(deps);
+  assert.equal(again.decisions.length, 0, `no new decisions expected: ${JSON.stringify(again.decisions)}`);
+  assert.equal((await repo.list("actions", { eq: { type: "ads.set_budget", status: "pending_approval" } })).length, 1);
+  assert.equal((deps.integrations.notifier as unknown as { sent: string[] }).sent.length, notified);
+
   const perf = await call("GET", `/v1/performance?product_id=${id}`);
   assert.equal(perf.body.length, 3);
   const alloc = await call("GET", "/v1/allocation");
@@ -203,4 +211,20 @@ test("economics endpoint and calibration endpoint", async () => {
   assert.ok(e.body.gates.pass);
   const cal = await call("POST", "/v1/calibrate");
   assert.equal(cal.body.applied, false);
+});
+
+test("iterate round gets fresh budget instead of being killed on arrival", async () => {
+  const { repo, deps, meta } = setup();
+  const product = await repo.insert("products", { title: "Lamp", status: "testing", economics: { breakevenCpa: 20, targetCpa: 14, contribution: 20 }, test_budget: 120 });
+  const campaign = await repo.insert("campaigns", { product_id: product.id, channel: "meta", phase: "testing", status: "active", name: "c", daily_budget: 30, external_campaign_id: "c1", external_adset_id: "s1" });
+  const cr = await repo.insert("creatives", { product_id: product.id, status: "live", format: "video" });
+  const ad = await repo.insert("ads", { campaign_id: campaign.id, product_id: product.id, creative_id: cr.id, channel: "meta", external_ad_id: "a1", status: "active" });
+  // near-miss: spent the budget, a couple of purchases, CPA ~ breakeven
+  meta.metrics = [{ externalAdId: "a1", date: "2026-11-24", spend: 125, impressions: 15000, clicks: 300, addToCarts: 20, checkouts: 10, purchases: 6, revenue: 240 }];
+  const r1 = await runGuardian(deps);
+  assert.equal(r1.productVerdicts[0]?.action, "iterate_creatives", JSON.stringify(r1.productVerdicts));
+  const p1 = await repo.get("products", product.id as string);
+  assert.equal(p1!.status, "creative_production");
+  assert.ok(Number(p1!.test_budget) > 125, `round two budget ${p1!.test_budget}`);
+  void ad;
 });

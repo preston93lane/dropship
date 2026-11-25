@@ -10,7 +10,7 @@
  */
 import { evaluateAd, evaluateProductTest, type AdDecision, type AdStats } from "../core/rules.ts";
 import type { Ad, Campaign, MetricsRow, Product, Repo, Row } from "../repo/types.ts";
-import { submitAction, type Deps } from "./actions.ts";
+import { engageKillSwitch, submitAction, type Deps } from "./actions.ts";
 import { loadEconomicsDefaults, loadGuardrails, loadRules } from "./settings.ts";
 
 export interface GuardianReport {
@@ -49,6 +49,7 @@ async function ensureBrief(repo: Repo, productId: string, reason: string, notes:
 
 export async function runGuardian(deps: Deps, opts: { lookbackDays?: number } = {}): Promise<GuardianReport> {
   const { repo, integrations, now } = deps;
+  const runStarted = now().getTime() - 1000;
   const report: GuardianReport = { synced: 0, spendToday: 0, killSwitchTripped: false, decisions: [], productVerdicts: [], warnings: [] };
   const guardrails = await loadGuardrails(repo);
   const rules = await loadRules(repo);
@@ -98,10 +99,7 @@ export async function runGuardian(deps: Deps, opts: { lookbackDays?: number } = 
   const active = await repo.list<Campaign>("campaigns", { eq: { status: "active" } });
   if (report.spendToday > guardrails.maxDailyAdSpend * 1.15 && !guardrails.killSwitch) {
     report.killSwitchTripped = true;
-    await repo.setSetting("guardrails", { ...guardrails, killSwitch: true }, "guardian", `spend $${report.spendToday} > 115% of cap`);
-    for (const c of active) {
-      await submitAction(deps, { type: "ads.pause", payload: { campaign_id: c.id, reason: "spend guard" }, requested_by: "guardian", rationale: "kill switch: spend runaway" });
-    }
+    await engageKillSwitch(deps, "guardian", `spend guard: $${report.spendToday} > 115% of the $${guardrails.maxDailyAdSpend} cap`);
     await integrations.notifier.send(
       `KILL SWITCH TRIPPED: today's ad spend $${report.spendToday} exceeds cap $${guardrails.maxDailyAdSpend}. All campaigns paused. Re-enable in the console after review.`,
       deps.consoleUrl ? { severity: "critical", link: deps.consoleUrl } : { severity: "critical" },
@@ -154,22 +152,34 @@ export async function runGuardian(deps: Deps, opts: { lookbackDays?: number } = 
     if (ad.status !== "active") continue;
     if (d.action === "watch" || d.action === "keep") continue;
 
-    report.decisions.push({ ad_id: ad.id, action: d.action, reason: d.reason });
+    // Only record and report decisions that cause something NEW to happen. A scale waiting on a human
+    // or a refresh brief already open would otherwise re-notify every 30 minutes.
     let actionId: string | null = null;
+    let isNew = false;
     if (d.action === "kill") {
       const a = await submitAction(deps, { type: "ads.pause", payload: { ad_id: ad.id, kill: true, reason: d.reason }, requested_by: "guardian", rationale: d.reason });
       actionId = a.id;
+      isNew = true;
     } else if (d.action === "scale" && !scaledCampaigns.has(c.id) && c.status === "active") {
       scaledCampaigns.add(c.id);
-      const next = Math.round(Number(c.daily_budget) * (1 + (d.budgetChangePct ?? 0.2)) * 100) / 100;
-      const a = await submitAction(deps, { type: "ads.set_budget", payload: { campaign_id: c.id, dailyBudget: next }, requested_by: "guardian", rationale: d.reason, idempotency_key: `scale-${c.id}-${until}` });
-      actionId = a.id;
+      const pending = (await repo.list<Row>("actions", { eq: { type: "ads.set_budget", status: "pending_approval" } })).some(
+        (a) => (a.payload as { campaign_id?: string }).campaign_id === c.id,
+      );
+      if (!pending) {
+        const next = Math.round(Number(c.daily_budget) * (1 + (d.budgetChangePct ?? 0.2)) * 100) / 100;
+        const a = await submitAction(deps, { type: "ads.set_budget", payload: { campaign_id: c.id, dailyBudget: next }, requested_by: "guardian", rationale: d.reason, idempotency_key: `scale-${c.id}-${until}` });
+        actionId = a.id;
+        isNew = Date.parse(String(a.created_at ?? 0)) >= runStarted;
+      }
     } else if (d.action === "refresh_creative") {
       if (await ensureBrief(repo, product.id, "refresh_fatigue", `Fatigue on creative ${ad.creative_id}: ${d.reason}. Produce new hooks/first frames on the same winning concept.`, ad.creative_id)) {
+        isNew = true;
         if (product.status === "scaling") await transition(repo, product, "refreshing", d.reason);
         await integrations.triggerLoop?.("create", `fatigue on ${product.title}`);
       }
     }
+    if (!isNew) continue;
+    report.decisions.push({ ad_id: ad.id, action: d.action, reason: d.reason });
     await repo.insert("decisions", { ad_id: ad.id, product_id: product.id, source: "guardian", action: d.action, reason: d.reason, metrics: d.metrics, action_id: actionId });
   }
 
@@ -209,7 +219,8 @@ export async function runGuardian(deps: Deps, opts: { lookbackDays?: number } = 
       if (prior.length >= 1) {
         await transition(repo, product, "killed", `${verdict.reason}; already iterated once`, { outcome: "loser", decided_at: now().toISOString() });
       } else {
-        await transition(repo, product, "creative_production", verdict.reason);
+        // Second (final) round: fresh budget of half the original, on top of what was already spent.
+        await transition(repo, product, "creative_production", verdict.reason, { test_budget: Math.round(totalSpend + testBudget * 0.5) });
         await ensureBrief(repo, product.id, "new_angles", `${verdict.reason}. Use different angles/hook types than the first batch; keep anything with P(profitable)>=0.4.`);
         await integrations.triggerLoop?.("create", `iterate ${product.title}`);
       }

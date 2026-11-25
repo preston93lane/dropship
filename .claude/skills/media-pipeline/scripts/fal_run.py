@@ -38,6 +38,33 @@ def collect_urls(obj, found: list[str]) -> list[str]:
     return found
 
 
+def adapt_payload(payload: dict, entry: dict | None) -> dict:
+    """Map a generic image_url/image_urls onto the model's own field and apply cost-safe defaults."""
+    if not entry:
+        return payload
+    out = dict(payload)
+    field = entry.get("image_field")
+    if field:
+        src = out.pop("image_url", None) if field != "image_url" else None
+        srcs = out.pop("image_urls", None) if field != "image_urls" else None
+        if field == "image_urls" and src and "image_urls" not in out:
+            out["image_urls"] = [src]
+        elif field != "image_urls" and field not in out and (src or srcs):
+            out[field] = src or srcs[0]
+        elif src and field not in out:
+            out[field] = src
+    for k, v in (entry.get("defaults") or {}).items():
+        out.setdefault(k, v)
+    return out
+
+
+def queue_urls(endpoint: str, rid: str) -> tuple[str, str]:
+    """fal queue request URLs use the app id (first two path segments), not the full endpoint path."""
+    app = "/".join(endpoint.split("/")[:2])
+    base = f"https://queue.fal.run/{app}/requests/{rid}"
+    return f"{base}/status", base
+
+
 def guess_kind(entry: dict | None, endpoint: str) -> str:
     text = endpoint + json.dumps(entry or {})
     if any(k in text for k in ("video", "i2v", "avatar")):
@@ -60,6 +87,7 @@ def main() -> int:
     payload = json.loads(Path(args.input[1:]).read_text() if args.input.startswith("@") else args.input)
     endpoint = resolve_endpoint(args.model)
     entry = find_model(args.model) or find_model(endpoint)
+    payload = adapt_payload(payload, entry)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     seconds = float(str(payload.get("duration", payload.get("seconds", 5))).rstrip("s") or 5)
@@ -79,8 +107,9 @@ def main() -> int:
     headers = {"authorization": f"Key {os.environ['FAL_KEY']}"}
     sub = http_json("POST", f"https://queue.fal.run/{endpoint}", payload, headers)
     rid = sub.get("request_id")
-    status_url = sub.get("status_url") or f"https://queue.fal.run/{endpoint}/requests/{rid}/status"
-    response_url = sub.get("response_url") or f"https://queue.fal.run/{endpoint}/requests/{rid}"
+    fallback_status, fallback_response = queue_urls(endpoint, rid)
+    status_url = sub.get("status_url") or fallback_status
+    response_url = sub.get("response_url") or fallback_response
     log(f"submitted {endpoint} request {rid} (est ${est})")
     deadline = time.time() + args.timeout
     delay = 2.0

@@ -50,6 +50,7 @@ export interface ConsoleData {
   proposals: Row[];
   latestReport: Row | null;
   products: Row[];
+  pnl?: { contribution_source: string; totals: Record<string, number>; attribution_ratio: number | null } | null;
 }
 
 export function renderConsole(d: ConsoleData): string {
@@ -104,6 +105,10 @@ export function renderConsole(d: ConsoleData): string {
     · pipeline: ${Object.entries(counts).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "empty"}</div>
     <div class="grid">
       <section class="card" style="grid-column:1/-1"><h2>Waiting on you (${d.pending.length})</h2>${pending}</section>
+      ${d.pnl ? `<section class="card" style="grid-column:1/-1"><h2>Last 7 days <span class="pill">${esc(d.pnl.contribution_source)}</span></h2>
+        <div class="row" style="gap:22px">${[["Ad spend", "ad_spend"], ["Store revenue", "store_revenue"], ["Orders", "store_orders"], ["Refunds", "refunds"], ["Contribution after ads", "contribution_after_ads"], ["Machine cost", "machine_cost"], ["Net", "net"]]
+          .map(([label, k]) => `<div><div class="sub" style="margin:0">${label}</div><div style="font-size:20px;font-weight:700">${k === "store_orders" ? "" : "$"}${esc(d.pnl!.totals[k!] ?? 0)}</div></div>`).join("")}
+        ${d.pnl.attribution_ratio !== null ? `<div><div class="sub" style="margin:0">Platform vs store revenue</div><div style="font-size:20px;font-weight:700">${esc(d.pnl.attribution_ratio)}x</div></div>` : ""}</div></section>` : ""}
       <section class="card"><h2>Guardrails</h2>
         <form method="post" action="console/guardrails" class="row">
           <label>Autonomy<select name="autonomyLevel">${[0, 1, 2, 3].map((l) => `<option value="${l}" ${l === g.autonomyLevel ? "selected" : ""}>L${l}</option>`).join("")}</select></label>

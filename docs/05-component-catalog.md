@@ -70,7 +70,7 @@ against a real account or API · 📝 written, ready to apply or run · 🔲 pla
 | S15 | video-ad-production | ✅ | video-producer |
 | S16 | ai-video-generation | ✅ (doc); 🟡 live models | video-producer |
 | S17 | motion-graphics (+ Remotion: AdVideo, ProductShowcase, KineticHook) | ✅ (rendered, QA'd) | video-producer |
-| S18 | media-pipeline (fal_run, voiceover, assemble, finalize, qa_video, upload, registry) | ✅ dry-run end to end; 🟡 live fal endpoints | producers, compliance |
+| S18 | media-pipeline (fal_run, voiceover, assemble, finalize, qa_video, upload, registry) | ✅ dry-run end to end; registry endpoints checked on fal 2026-11-25 (some input names still 🟡) | producers, compliance |
 | S19 | ad-compliance | ✅ (+ 14 eval cases) | compliance-reviewer, creative-director |
 | S20 | meta-ads | ✅ | media-buyer |
 | S21 | tiktok-ads | ✅ | media-buyer |

@@ -5,6 +5,10 @@ description: Produce decision-ready performance reports - daily P&L (spend, reve
 
 # Performance reporting
 
+## Source of truth
+
+`gw GET /v1/pnl?days=1` (daily) or `?days=7` (weekly). When `contribution_source` is `store`, numbers come from Shopify orders (real revenue, refunds, COGS, fees). Lead with those and show the platform-vs-store `attribution_ratio` (a ratio well above 1.2 means the platforms are over-claiming). When it is `modeled`, say so in the summary line.
+
 ## Metric definitions
 
 - **Ad spend**, **attributed revenue**, **purchases**: platform-reported (Meta/TikTok), from `/v1/performance` and `ad_metrics_daily`.

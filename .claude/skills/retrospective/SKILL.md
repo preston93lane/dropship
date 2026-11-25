@@ -7,7 +7,7 @@ description: Weekly evidence-based retrospective that turns outcomes into durabl
 
 ## Inputs
 
-`gw GET /v1/outcomes` (concluded products with score components), `gw GET /v1/products/<id>` for each (creatives, ads, decisions, events), `gw GET /v1/experiments`, `gw GET /v1/reports?kind=daily&limit=7`, the cost log.
+`gw GET /v1/outcomes` (concluded products with score components), `gw GET /v1/insights/creatives` (performance by format, hook type, angle, concept family, AI vs. real), `gw GET /v1/pnl?days=7`, `gw GET /v1/products/<id>` for each (creatives, ads, decisions, events), `gw GET /v1/experiments`, `gw GET /v1/reports?kind=daily&limit=7`, the cost log.
 
 ## Questions to answer (with numbers)
 

@@ -19,6 +19,10 @@ Meta's delivery system (Andromeda) and TikTok's group visually and structurally 
 
 Give each creative a `concept_family` label (angle + format, e.g. `glowup-demo`). Iterations of a winner share the family; new tests need new families.
 
+## Start from the data
+
+Before planning a batch, read `gw GET /v1/insights/creatives` (which formats, hook types, angles and concept families have produced purchases and CTR in this store) and the playbook's `creative-patterns.md`. Lean on proven dimensions for most of the batch, and keep at least one slot for an untested dimension so the system keeps learning. With fewer than ~20 measured creatives, treat differences as hunches.
+
 ## Batch recipes
 
 **Initial test (5)**

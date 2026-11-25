@@ -1,16 +1,21 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@anthropic-ai/sdk@1.8.0": "1.8.0",
-    "npm:@supabase/supabase-js@2.118.0": "2.118.0"
+    "npm:@anthropic-ai/sdk@1.8.0": "1.8.0_zod@4.6.7",
+    "npm:@supabase/supabase-js@2.118.0": "2.118.0",
+    "npm:zod@4.6.7": "4.6.7"
   },
   "npm": {
-    "@anthropic-ai/sdk@1.8.0": {
+    "@anthropic-ai/sdk@1.8.0_zod@4.6.7": {
       "integrity": "sha512-yDOArk2+Qpd/djEKmZjrv7JZ+pn5iBHARJ9PAdvfhGf4H5wNqTgY/2K0/yDKdQdm8G8hrNQchMlBAHpPK7yBfg==",
       "dependencies": [
         "@opentelemetry/api",
         "json-schema-to-ts",
-        "standardwebhooks"
+        "standardwebhooks",
+        "zod"
+      ],
+      "optionalPeers": [
+        "zod"
       ],
       "bin": true
     },
@@ -93,6 +98,9 @@
     },
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
+    },
+    "zod@4.6.7": {
+      "integrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg=="
     }
   },
   "workspace": {

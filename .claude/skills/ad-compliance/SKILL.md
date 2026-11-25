@@ -52,9 +52,11 @@ Dropshipping stores die from three things: ad accounts banned for policy violati
 
 ## Verdict
 
+For video, upload the keyframes you reviewed (`qa_video.py --frames`, then `upload.py` each to `products/<id>/creatives/<slug>/qa/…`) and pass their public URLs as `frames`, so the gateway's independent judge sees what you saw. A `pass` from you is re-checked by that judge; if it disagrees, the creative is rejected with its issues attached. A `503` means the judge is down: the creative stays in review, so retry later.
+
 `gw POST /v1/creatives/<id>/compliance`:
 ```json
-{"verdict": "revise",
+{"verdict": "revise", "frames": ["https://…/qa/00_first.jpg", "https://…/qa/scene_01.jpg"],
  "issues": [{"severity": "high", "location": "00:04-00:06 VO", "problem": "\"never tangles again\" is not supported", "fix": "say \"keeps up to 6 cables in place\""}],
  "checklist": {"prohibited": "ok", "claims": "issue", "testimonials": "ok", "fidelity": "ok", "offer": "ok", "ai_disclosure": "required", "ip": "ok", "craft": "ok"},
  "notes": "ai_disclosure_required: true"}
