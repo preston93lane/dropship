@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+out/
+renders/
+*.log
+.DS_Store
+supabase/.temp/
+supabase/.branches/
+.claude/skills/motion-graphics/remotion/node_modules/
+.claude/skills/motion-graphics/remotion/out/
+.claude/settings.local.json

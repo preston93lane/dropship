@@ -1,0 +1,24 @@
+{
+  "name": "dropship-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous AI-agent dropshipping operating system: research, plan, execute, adapt, improve.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --no-warnings --test --test-reporter=spec \"supabase/functions/_shared/**/*.test.ts\" \"scripts/**/*.test.mjs\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "check:edge": "npx --yes deno@2.9.6 check --node-modules-dir=none supabase/functions/gateway/index.ts supabase/functions/guardian/index.ts",
+    "economics": "node --experimental-strip-types --no-warnings scripts/economics.ts",
+    "agents:sync-claude-code": "node scripts/sync-claude-code-agents.mjs",
+    "agents:plan": "ant apply --dry-run -v agents",
+    "proposals:pull": "node scripts/proposals.mjs",
+    "dev:gateway": "node --experimental-strip-types --no-warnings scripts/dev-gateway.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.0"
+  }
+}

@@ -1,0 +1,9 @@
+# Minimal Supabase CLI config. `supabase init` would generate a fuller file;
+# these function settings are the part this project depends on.
+project_id = "dropship"
+
+[functions.gateway]
+verify_jwt = false   # the gateway does its own auth (agent key / admin key / cron secret)
+
+[functions.guardian]
+verify_jwt = false   # protected by x-cron-secret
