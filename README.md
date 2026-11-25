@@ -43,7 +43,7 @@ npm run dev:gateway            # API + console at http://localhost:8787/console 
 npm run loop -- research       # runs the RESEARCH loop in Claude Code against the local gateway
 ```
 
-**New here? Read [docs/OPERATOR-GUIDE.md](docs/OPERATOR-GUIDE.md) first.** It covers what's built, how to use it,
+**Starting this weekend? Follow [docs/WEEKEND-START.md](docs/WEEKEND-START.md).** **New here? Read [docs/OPERATOR-GUIDE.md](docs/OPERATOR-GUIDE.md) first.** It covers what's built, how to use it,
 what's needed from you, and the best way to run the whole thing.
 
 Without `FAL_KEY` the media scripts run in dry-run mode (placeholder media), so the creative pipeline can be
