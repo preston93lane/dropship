@@ -20,7 +20,7 @@ const repo = new MemoryRepo();
 
 if (existsSync(DB_FILE)) {
   const saved = JSON.parse(readFileSync(DB_FILE, "utf8")) as { tables: Record<string, Record<string, unknown>[]>; settings: Record<string, unknown> };
-  for (const [t, rows] of Object.entries(saved.tables)) repo.tables.set(t, new Map(rows.map((r) => [String(r.id ?? `${r.ad_id}|${r.date}`), r])));
+  for (const [t, rows] of Object.entries(saved.tables)) repo.tables.set(t, new Map(rows.map((r) => [String(r.id ?? r.shopify_order_id ?? `${r.ad_id}|${r.date}`), r])));
   for (const [k, v] of Object.entries(saved.settings)) repo.settings.set(k, v);
 }
 const persist = () => {

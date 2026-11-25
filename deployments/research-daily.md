@@ -9,4 +9,4 @@ schedule: {type: cron, expression: "17 5 * * *", timezone: America/New_York}
 budget: {type: limit, max_list_cost: {amount: "400", currency: USD}}
 ---
 
-Run the RESEARCH loop for today. Niche and constraints: read config in the run-cycle skill and the playbook's niche-notes.md. Validate at most 4 products; quality over quantity. Close the run with a summary.
+Run the RESEARCH loop for today. Niche and constraints: read the business-profile skill and the playbook's niche-notes.md. Validate at most 4 products; quality over quantity. Close the run with a summary.

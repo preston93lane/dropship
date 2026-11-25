@@ -10,7 +10,8 @@ An AI-agent operating system for a dropshipping business. Read `README.md` for t
 - `.claude/skills/*/SKILL.md` — skills shared by cloud agents (uploaded by `ant apply`) and local Claude Code.
 - `environments/ vaults/ memory_stores/ deployments/` — Managed Agents infra, applied with `npm run agents:apply`.
 - `supabase/functions/_shared/core/` — pure, tested business logic (economics, scoring, rules, allocation, policy, lifecycle).
-- `supabase/functions/_shared/app/` — gateway API, guardian loop, console. `adapters/` — Shopify/Meta/TikTok/CJ + dry-run twins.
+- `supabase/functions/_shared/app/` — gateway API, guardian loop, console, Telegram, Shopify webhooks, P&L, insights, compliance-judge contract.
+  `adapters/` — Shopify/Meta/TikTok/CJ/Telegram + dry-run twins. `edge/` — Deno-only code with `npm:` imports (SDK triggers, judge).
 - `supabase/migrations/` — database schema. `playbook/` — seed knowledge. `evals/` — eval cases for prompt changes.
 
 ## Rules
@@ -25,5 +26,5 @@ An AI-agent operating system for a dropshipping business. Read `README.md` for t
 
 ## Local mode
 
-`npm run dev:gateway` serves the full API + console on :8787 with an in-memory DB and dry-run integrations.
-`export GATEWAY_URL=http://localhost:8787 GATEWAY_KEY=dev-agent-key`, then ask for any agent by name.
+`npm run demo` seeds fake data; `npm run dev:gateway` serves the full API + console on :8787 with an in-memory DB
+and dry-run integrations; `npm run loop -- <loop>` runs a loop in Claude Code against it.

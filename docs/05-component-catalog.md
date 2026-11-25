@@ -35,6 +35,14 @@ against a real account or API · 📝 written, ready to apply or run · 🔲 pla
 | C19 | Event-driven loop wakeups | 🟡 | `_shared/edge/triggers.ts` | Anthropic SDK `beta.deployments.run`; Deno type-checked. Needs deployment ids |
 | C20 | Local dev gateway | ✅ | `scripts/dev-gateway.ts` | Full API + console on :8787, in-memory DB persisted to `data/` |
 | C21 | Storage repo (Supabase) | 🟡 | `_shared/repo/supabase.ts` | Type-checked against real supabase-js; exercise it after deploy |
+| C30 | Telegram approvals + commands | ✅ (tested) / 🟡 live bot | `_shared/app/telegram.ts`, `TelegramBot` | One-tap approve/reject buttons; `/status /pending /pnl /kill`; only your chat id is obeyed; webhook secret enforced |
+| C31 | Shopify order webhooks | ✅ (tested) / 🟡 live store | `_shared/app/shopify-webhooks.ts` | HMAC-verified `orders/create` + `orders/updated` → `orders`, per product, refunds recomputed |
+| C32 | True P&L | ✅ | `_shared/app/pnl.ts`, `GET /v1/pnl` | Store-based contribution (or modeled fallback), machine cost, net, attribution ratio; console card + Telegram `/pnl` |
+| C33 | Independent compliance judge | ✅ (contract tested) / 🟡 live API | `_shared/app/compliance.ts`, `_shared/edge/compliance-judge.ts` | Claude Opus 5.5 structured output + refusal fallbacks; both the agent and the judge must pass; fails closed. Deno type-checked against SDK 1.8.0 |
+| C34 | Creative insights | ✅ | `_shared/app/insights.ts`, `GET /v1/insights/creatives` | Performance by format, hook type, angle, concept family, AI vs. real |
+| C35 | Demo data | ✅ | `scripts/demo.ts` (`npm run demo`) | A realistic week: winner, kills, iteration, approvals, orders, report |
+| C36 | Loop launcher | ✅ | `scripts/loop.mjs` (`npm run loop -- <loop>`) | Runs any loop in Claude Code with the cloud kickoff |
+| C37 | Smoke test | ✅ | `scripts/smoke.mjs` (`npm run smoke`) | Read-only checks of a deployed gateway, auth, webhooks and key scopes |
 
 ## Agents and orchestration
 
@@ -86,18 +94,21 @@ against a real account or API · 📝 written, ready to apply or run · 🔲 pla
 
 | Id | Component | Why | Sketch | Phase |
 |---|---|---|---|---|
-| P01 | Shopify orders webhook → `orders` | True P&L, refunds, attribution reconciliation | Edge function `shopify-webhooks` (HMAC verify) upserting `orders`; report uses it over platform attribution | 6 |
-| P02 | Server-side compliance judge | Separation of duties: an independent model checks every creative before `approved` | In `/v1/creatives/:id/compliance`, call Claude (Sonnet) with the checklist + keyframes; require both verdicts to pass | 6 |
-| P03 | Telegram approve/reject buttons | Faster approvals from the phone | Inline keyboard callback → `/telegram/webhook` → `decideAction` | 5 |
+| ~~P01~~ | ~~Shopify orders webhook~~ | built: C31, C32 | | |
+| ~~P02~~ | ~~Server-side compliance judge~~ | built: C33 | | |
+| ~~P03~~ | ~~Telegram approve/reject buttons~~ | built: C30 | | |
 | P04 | Meta Advantage+ Sales scaling structure | Better scaling at volume | New action `ads.create_scaling_asc`; policy L3 | 7 |
 | P05 | TikTok Shop listing completion + GMV Max | Shop channel | Seller Center API for attributes; GMV Max campaign action | 7 |
 | P06 | affiliate-manager agent + creator tables | Highest-ROI TikTok Shop growth | `agents/planned/affiliate-manager.md`; tables `creators`, `collabs` | 7 |
 | P07 | support-agent + helpdesk | Fewer chargebacks, more reviews | `agents/planned/support-agent.md`; Shopify Inbox/Gmail integration | 7 |
 | P08 | Email/SMS retention flows | Lifts LTV and blended ROAS | Klaviyo flows (abandoned checkout, post-purchase, winback); the `marketing:email-sequence` skill can draft them | 7 |
-| P09 | Creative attribute analytics view | Faster retros | SQL view joining creatives (format, hook_type, angle) with metrics | 6 |
+| ~~P09~~ | ~~Creative attribute analytics~~ | built: C34 | | |
 | P10 | Real UGC creators for winners | Real footage beats AI for demos | Brief generator + platform (e.g. Billo/Insense) outreach; human-approved | 7 |
 | P11 | Multi-store / multi-niche | Diversification | `store_id` on core tables + per-store business profiles | 7+ |
 | P12 | Research data integrations | Better proof signals | FastMoss API / Apify ad-library actor as gateway read endpoints (keys stay server-side) | 5-6 |
 | P13 | Landing page experiments | Conversion lifts | Shopify theme variants or a testing app; `experiments` table already exists | 6 |
 | P14 | Live KPI dashboard | At-a-glance health | Read-only dashboard over the views; or a Claude artifact reading the gateway | 6 |
 | P15 | Parallel cloud rendering | Throughput at scale | Remotion Lambda or Cloud Run; only when renders > ~50/day | 7+ |
+| P16 | Automatic LLM cost sync | Machine P&L without manual cost entries | Guardian pulls each deployment run's session cost (Managed Agents usage) or the Anthropic Cost API into `costs` (category `llm`) | 5-6 |
+| P17 | Creative previews in Telegram | Approve launches while seeing the ads | Send the thumbnail and a frame strip with each `ads.activate` approval | 6 |
+| P18 | Platform AI-content label via API | No manual step for AI disclosure | Set the AIGC flag on TikTok ad creation and the equivalent Meta field when the creative's compliance notes require it | 5 |

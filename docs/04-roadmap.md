@@ -10,7 +10,8 @@ Decision engine, gateway, guardian, schema, agents, skills, media pipeline, temp
 
 ## Phase 1: Assisted research (days 1-3) · cost: Claude usage only
 - [ ] Choose the niche; fill in `.claude/skills/business-profile/SKILL.md` (brand, avatar, exclusions)
-- [ ] `npm ci && npm run dev:gateway`; in Claude Code: "act as the product-analyst and run the RESEARCH loop"
+- [ ] `npm ci && npm run demo && npm run dev:gateway`; explore the console with demo data
+- [ ] `npm run loop -- research` (runs the RESEARCH loop in Claude Code against the local gateway)
 - [ ] Review candidates in the console (`http://localhost:8787/console`, key `dev-admin-key`)
 - [ ] Tune `product-research` (sources, rubric anchors) where its judgment differs from yours
 - **DoD**: 10 validated products, of which you'd personally launch at least 5.
@@ -26,7 +27,8 @@ Decision engine, gateway, guardian, schema, agents, skills, media pipeline, temp
 ## Phase 3: Store + infrastructure (week 2) · cost: Shopify ~$30-40/mo
 - [ ] Shopify store: theme, policies, reviews app, supplier app, FB & IG and TikTok channel apps (`docs/07-setup.md` §3)
 - [ ] Supabase project: `supabase db push`, set secrets, deploy `gateway` + `guardian`, run `schedule_guardian.sql`
-- [ ] Telegram bot for notifications; open the console at `/functions/v1/gateway/console`
+- [ ] Telegram bot with one-tap approvals (`docs/07-setup.md` → Telegram); open the console at `/functions/v1/gateway/console`
+- [ ] Shopify order webhooks (true P&L) and `npm run smoke` against the deployed gateway
 - [ ] With **DRY_RUN=false on a development store first**, create one draft listing through the gateway and verify it in Shopify admin (C14)
 - **DoD**: draft listings created via the gateway; the console works on your phone; notifications arrive.
 
@@ -50,8 +52,8 @@ Decision engine, gateway, guardian, schema, agents, skills, media pipeline, temp
 ## Phase 6: Self-improvement (months 2-3)
 - [ ] Weekly IMPROVE runs; review proposals in the console; `npm run proposals:pull`, diff, test, merge, apply
 - [ ] Grow `evals/compliance` from real disapprovals; build the product-scoring backtest once ≥ 6 winners exist
-- [ ] Shopify orders webhook → `orders` table for true P&L and refund tracking (P01)
-- [ ] Server-side compliance judge in the gateway (P02)
+- [x] Shopify orders webhook → `orders` table for true P&L and refund tracking (built; connect it in Phase 3)
+- [x] Server-side compliance judge in the gateway (built; turns on with `ANTHROPIC_API_KEY`)
 - **DoD**: first eval-backed proposal merged; calibration applied; machine cost ≤ 20% of contribution.
 
 ## Phase 7: Expansion (month 3+)

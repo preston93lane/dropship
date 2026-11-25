@@ -143,7 +143,8 @@ export async function submitAction(deps: Deps, input: SubmitInput): Promise<Acti
   if (status === "approved") return executeAction(deps, row);
   if (status === "pending_approval") {
     const why = input.rationale ? ": " + input.rationale : "";
-    await integrations.notifier.send("Approval needed: " + describeAction(type, payload) + "\nRequested by " + input.requested_by + why, {
+    const title = productId ? (await repo.get<Product>("products", productId))?.title : undefined;
+    await integrations.notifier.send("Approval needed: " + (title ? title + ": " : "") + describeAction(type, payload) + "\nRequested by " + input.requested_by + why, {
       severity: "warn",
       ...(deps.consoleUrl ? { link: deps.consoleUrl } : {}),
       buttons: [

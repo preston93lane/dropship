@@ -18,7 +18,10 @@
     "dev:gateway": "node --experimental-strip-types --no-warnings scripts/dev-gateway.ts",
     "playbook:seed": "node --experimental-strip-types --no-warnings scripts/seed-playbook.ts",
     "skills:clean": "node scripts/clean-skills.mjs",
-    "agents:apply": "npm run skills:clean && ant apply agents environments vaults memory_stores deployments"
+    "agents:apply": "npm run skills:clean && ant apply agents environments vaults memory_stores deployments",
+    "demo": "node --experimental-strip-types --no-warnings scripts/demo.ts",
+    "loop": "node scripts/loop.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

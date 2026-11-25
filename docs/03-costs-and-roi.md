@@ -43,6 +43,7 @@ input cost substantially. Treat $375 as a ceiling for Standard and measure the r
 | Premium video (native audio shot, premium model) | | ~$5-8 |
 | Static ad (3 sizes) | 1 cutout + 1-2 scene edits + render | **~$0.10-0.30** |
 | Motion-graphic showcase | cutout only + Remotion render | **~$0.01** |
+| Independent compliance check | one Claude Opus 5.5 call with keyframes | ~$0.05-0.15 per creative |
 | AI presenter segment (HeyGen on fal, $0.10/s) | 10-25s | ~$1-2.50 |
 
 A 5-creative test batch is about $8-12 of media. Compare: human UGC creators commonly charge $100-300 per video,

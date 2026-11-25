@@ -9,15 +9,17 @@ Prereqs: Node 22+, git, [Claude Code](https://code.claude.com).
 ```bash
 npm ci
 npm test && npm run typecheck          # engine + gateway tests
+npm run demo                           # optional: a realistic week of fake data to explore
 npm run dev:gateway                    # API + console on http://localhost:8787 (admin key: dev-admin-key)
 ```
 
 In another terminal:
 
 ```bash
-export GATEWAY_URL=http://localhost:8787 GATEWAY_KEY=dev-agent-key
-claude    # then: "act as the product-analyst and run the RESEARCH loop for <niche>"
+npm run loop -- research               # opens Claude Code running the RESEARCH loop against the local gateway
 ```
+
+Any loop works the same way (`plan`, `create`, `execute`, `adapt`, `report`, `improve`, `strategy`).
 
 Fill in `.claude/skills/business-profile/SKILL.md` first (niche, brand, avatar, exclusions).
 
@@ -25,7 +27,7 @@ Fill in `.claude/skills/business-profile/SKILL.md` first (niche, brand, avatar, 
 
 1. Create an account; add **prepaid credits** ($20-50 to start) and turn **auto-top-up off**. That's your hard media cap.
 2. Create an API key → `export FAL_KEY=...` locally (cloud: vault credential, step 6).
-3. Open each fal model page for the `verify: true` entries in `.claude/skills/media-pipeline/models.json`; fix the endpoint ids and input fields.
+3. Endpoints and prices in `.claude/skills/media-pipeline/models.json` were checked on fal on 2026-11-25. For entries still marked `verify: true`, confirm the input field names on the model's API page the first time you use them.
 4. `cd .claude/skills/motion-graphics/remotion && npm ci && ./make-demo-assets.sh && npx remotion render src/index.ts AdVideo out/test.mp4 --props=props/example-ad.json`
 
 ## 2. Supabase (state, gateway, guardian)
@@ -53,6 +55,28 @@ Generate secrets with `openssl rand -hex 32`. Create **four scoped agent keys** 
 Then run `supabase/sql/schedule_guardian.sql` in the SQL editor (replace the placeholders) and open
 `https://<ref>.supabase.co/functions/v1/gateway/console`.
 
+Check the deployment (read-only, changes nothing):
+
+```bash
+GATEWAY_URL=https://<ref>.supabase.co/functions/v1/gateway GATEWAY_ADMIN_KEY=<admin key> GATEWAY_RESEARCH_KEY=<research key> npm run smoke
+```
+
+### Telegram (approve from your phone)
+
+1. In Telegram, message **@BotFather** → `/newbot` → copy the bot token into `TELEGRAM_BOT_TOKEN`.
+2. Send your new bot any message, then open `https://api.telegram.org/bot<token>/getUpdates` and copy `message.chat.id` into `TELEGRAM_CHAT_ID`.
+3. Pick a random `TELEGRAM_WEBHOOK_SECRET` (`openssl rand -hex 24`), `supabase secrets set ...`, redeploy the gateway, then register the webhook:
+
+```bash
+curl -s "https://api.telegram.org/bot<token>/setWebhook" -d "url=https://<ref>.supabase.co/functions/v1/gateway/telegram/webhook" -d "secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+```
+
+4. Send `/status` to the bot. Approval requests now arrive with ✅ Approve / ❌ Reject buttons; `/pending`, `/pnl` and `/kill` (emergency stop) also work. Only your chat id is obeyed.
+
+### Independent compliance judge
+
+Set `ANTHROPIC_API_KEY` in Supabase secrets. Every creative the compliance agent passes is then re-checked by a separate Claude Opus 5.5 call made by the gateway (~$0.05-0.15 per creative). Both must pass, and if the judge can't run, the creative stays in review. `COMPLIANCE_JUDGE=off` disables it (not recommended).
+
 Replace `YOUR_PROJECT_REF` in `.claude/skills/gateway-api/gateway.env` and `environments/*.yaml`.
 
 ## 3. Shopify
@@ -63,6 +87,7 @@ Replace `YOUR_PROJECT_REF` in `.claude/skills/gateway-api/gateway.env` and `envi
 4. Settings → Apps → Develop apps → create a custom app with Admin API scopes `write_products`, `read_products`, `write_publications`, `read_publications`, `read_inventory` → install → copy the Admin API token into `SHOPIFY_ADMIN_TOKEN`.
 5. Publication ids: run `{ publications(first: 10) { nodes { id name } } }` in the Shopify GraphiQL app; set `SHOPIFY_ONLINE_STORE_PUBLICATION_ID` and `SHOPIFY_TIKTOK_PUBLICATION_ID`.
 6. **Verify on a development store first**: set `DRY_RUN=false`, `supabase secrets set ...`, create one draft listing via the store-manager, check it in admin.
+7. **Order webhooks (true P&L)**: Settings → Notifications → Webhooks → create **Order creation** and **Order update** (JSON) pointing at `https://<ref>.supabase.co/functions/v1/gateway/shopify/webhook`. Copy the signing secret shown on that page into `SHOPIFY_WEBHOOK_SECRET` (for app-created webhooks it's the app's client secret). Place a test order: it appears in the console's "Last 7 days" card with source `store`.
 
 ## 4. Meta (Facebook/Instagram ads)
 

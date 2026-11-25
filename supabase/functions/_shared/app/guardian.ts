@@ -97,7 +97,8 @@ export async function runGuardian(deps: Deps, opts: { lookbackDays?: number } = 
 
   // 2. Spend guard (defense in depth: platform-level account spend limits should already cap this)
   const active = await repo.list<Campaign>("campaigns", { eq: { status: "active" } });
-  if (report.spendToday > guardrails.maxDailyAdSpend * 1.15 && !guardrails.killSwitch) {
+  const spendCeiling = Math.round(guardrails.maxDailyAdSpend * 115) / 100; // 115% of the cap (rounded: 100 * 1.15 is 114.999... in floating point)
+  if (report.spendToday > spendCeiling && !guardrails.killSwitch) {
     report.killSwitchTripped = true;
     await engageKillSwitch(deps, "guardian", `spend guard: $${report.spendToday} > 115% of the $${guardrails.maxDailyAdSpend} cap`);
     await integrations.notifier.send(

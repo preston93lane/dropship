@@ -34,13 +34,16 @@ RESEARCH ──▶ PLAN ──▶ EXECUTE (create + list + launch) ──▶ ADA
 ```bash
 npm ci
 npm test                       # decision engine + gateway end-to-end tests
+npm run demo                   # a realistic week of fake business data
 npm run dev:gateway            # API + console at http://localhost:8787/console (admin key: dev-admin-key)
 ```
 
 ```bash
-export GATEWAY_URL=http://localhost:8787 GATEWAY_KEY=dev-agent-key
-claude                         # "act as the product-analyst and run the RESEARCH loop for desk-setup products"
+npm run loop -- research       # runs the RESEARCH loop in Claude Code against the local gateway
 ```
+
+**New here? Read [docs/OPERATOR-GUIDE.md](docs/OPERATOR-GUIDE.md) first.** It covers what's built, how to use it,
+what's needed from you, and the best way to run the whole thing.
 
 Without `FAL_KEY` the media scripts run in dry-run mode (placeholder media), so the creative pipeline can be
 exercised for free. Render the motion templates:
@@ -52,9 +55,9 @@ npx remotion render src/index.ts AdVideo out/ad.mp4 --props=props/example-ad.jso
 
 ## What's built vs. planned
 
-- ✅ **Built and verified here**: decision engine (economics, scoring, Bayesian kill/scale rules, Thompson allocation, autonomy policy, lifecycle); database schema (run on Postgres); gateway API with scoped keys and action queue; human console; guardian loop; dry-run adapters; local dev gateway; media pipeline (dry-run end to end); Remotion and static templates (rendered and QA'd); all agents, skills, environments and deployments (structure tested).
+- ✅ **Built and verified here**: decision engine (economics, scoring, Bayesian kill/scale rules, Thompson allocation, autonomy policy, lifecycle); database schema (run on Postgres); gateway API with scoped keys and action queue; human console with 7-day P&L; guardian loop; Telegram one-tap approvals and `/kill`; Shopify order webhooks and true P&L; independent compliance judge; creative insights; dry-run adapters; local dev gateway, demo data, loop launcher and smoke test; media pipeline (dry-run end to end, model registry checked against fal); Remotion and static templates (rendered and QA'd); all agents, skills, environments and deployments (structure tested).
 - 🟡 **Built, needs your live verification**: Shopify, Meta, TikTok and CJ adapters; fal model endpoints; notifications; Managed Agents apply.
-- 🔲 **Planned and specified**: orders webhook / true P&L, server-side compliance judge, Telegram approval buttons, ASC scaling, TikTok Shop GMV Max, affiliate and support agents, retention flows. See the catalog.
+- 🔲 **Planned and specified**: automatic LLM cost sync, creative previews in Telegram, AI-label via API, ASC scaling, TikTok Shop GMV Max, affiliate and support agents, retention flows. See the catalog.
 
 ## Repository map
 
