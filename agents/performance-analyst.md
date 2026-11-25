@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: false}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/performance-reporting
   - ../.claude/skills/unit-economics
 ---

@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: false}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/shopify-listing
   - ../.claude/skills/pdp-copywriting
   - ../.claude/skills/tiktok-shop

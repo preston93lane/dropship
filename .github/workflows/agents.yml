@@ -1,0 +1,43 @@
+# Ships agent/skill/deployment changes to Managed Agents.
+# - Pull requests: `ant apply --dry-run` shows the plan (needs the ANTHROPIC_API_KEY repo secret; skipped without it).
+# - Manual dispatch on the default branch: applies, then commits claude-lock.json.
+# Applying is manual on purpose: a merged prompt change is live for every loop on its next run.
+name: agents
+on:
+  pull_request:
+    paths: ["agents/**", ".claude/skills/**", "environments/**", "vaults/**", "memory_stores/**", "deployments/**"]
+  workflow_dispatch:
+env:
+  ANT_VERSION: "1.42.0"   # needs >= 1.40.0 (file paths in predefined_agents)
+jobs:
+  plan-or-apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for API key
+        id: key
+        run: echo "present=${{ secrets.ANTHROPIC_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+      - name: Install ant
+        if: steps.key.outputs.present == 'true'
+        run: |
+          curl -fsSL "https://github.com/anthropics/anthropic-cli/releases/download/v${ANT_VERSION}/ant_${ANT_VERSION}_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin ant
+          ant --version
+      - name: Refuse unfilled placeholders
+        if: steps.key.outputs.present == 'true'
+        run: "! grep -rn 'YOUR_' environments deployments"
+      - name: Plan
+        if: steps.key.outputs.present == 'true' && github.event_name == 'pull_request'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/clean-skills.mjs && ant apply --dry-run -v agents environments vaults memory_stores deployments
+      - name: Apply
+        if: steps.key.outputs.present == 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          node scripts/clean-skills.mjs
+          ant apply --yes agents environments vaults memory_stores deployments
+          git config user.name "agents-bot" && git config user.email "agents-bot@users.noreply.github.com"
+          git add claude-lock.json && git commit -m "Update claude-lock.json" && git push || echo "lock unchanged"

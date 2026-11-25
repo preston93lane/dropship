@@ -203,21 +203,6 @@ export function buildIntegrations(env: (k: string) => string | undefined): Integ
     },
   };
 
-  // Event-driven wakeups: run a Managed Agents deployment now instead of waiting for its cron.
-  const anthropicKey = env("ANTHROPIC_API_KEY");
-  const deployments = env("LOOP_DEPLOYMENTS_JSON"); // {"create":"depl_...","adapt":"depl_..."}
-  if (anthropicKey && deployments) {
-    const map = JSON.parse(deployments) as Record<string, string>;
-    integrations.triggerLoop = async (loop: string, reason: string) => {
-      const id = map[loop];
-      if (!id) return;
-      await requestJson(`https://api.anthropic.com/v1/deployments/${id}/run`, {
-        method: "POST",
-        headers: { "x-api-key": anthropicKey, "anthropic-version": "2026-10-21", "anthropic-beta": "managed-agents-2026-04-01" },
-        json: {},
-      }, { retries: 1, label: `trigger ${loop}` });
-      console.log(`[trigger] ${loop}: ${reason}`);
-    };
-  }
+  // triggerLoop (event-driven deployment runs) is attached by the Edge entrypoints: see _shared/edge/triggers.ts
   return integrations;
 }

@@ -3,6 +3,7 @@
 // Deploy: supabase functions deploy guardian --no-verify-jwt
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 import { buildIntegrations } from "../_shared/adapters/index.ts";
+import { attachLoopTriggers } from "../_shared/edge/triggers.ts";
 import { runGuardian } from "../_shared/app/guardian.ts";
 import { SupabaseRepo } from "../_shared/repo/supabase.ts";
 
@@ -17,7 +18,7 @@ Deno.serve(async (req) => {
   const consoleUrl = env("CONSOLE_URL");
   const report = await runGuardian({
     repo: new SupabaseRepo(db),
-    integrations: buildIntegrations(env),
+    integrations: attachLoopTriggers(buildIntegrations(env), env),
     now: () => new Date(),
     ...(consoleUrl ? { consoleUrl } : {}),
   });

@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: true}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/retrospective
   - ../.claude/skills/prompt-evolution
   - ../.claude/skills/model-scouting

@@ -2,6 +2,7 @@
 // Deploy: supabase functions deploy gateway --no-verify-jwt
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
 import { buildIntegrations } from "../_shared/adapters/index.ts";
+import { attachLoopTriggers } from "../_shared/edge/triggers.ts";
 import { createGateway } from "../_shared/app/gateway.ts";
 import { SupabaseRepo } from "../_shared/repo/supabase.ts";
 
@@ -16,7 +17,7 @@ const db = createClient(required("SUPABASE_URL"), required("SUPABASE_SERVICE_ROL
 const consoleUrl = env("CONSOLE_URL");
 const deps = {
   repo: new SupabaseRepo(db),
-  integrations: buildIntegrations(env),
+  integrations: attachLoopTriggers(buildIntegrations(env), env),
   now: () => new Date(),
   ...(consoleUrl ? { consoleUrl } : {}),
 };

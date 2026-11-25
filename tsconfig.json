@@ -14,5 +14,6 @@
     "noImplicitOverride": true,
     "skipLibCheck": true
   },
-  "include": ["supabase/functions/_shared/**/*.ts", "scripts/**/*.ts"]
+  "include": ["supabase/functions/_shared/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["supabase/functions/_shared/edge/**"]
 }

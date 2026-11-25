@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: true}
 skills:
   - ../../.claude/skills/gateway-api
+  - ../../.claude/skills/business-profile
   - ../../.claude/skills/tiktok-shop
 ---
 

@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: true}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/product-research
   - ../.claude/skills/supplier-sourcing
   - ../.claude/skills/competitor-ad-teardown

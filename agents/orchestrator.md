@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: false}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/run-cycle
   - ../.claude/skills/unit-economics
   - ../.claude/skills/kill-scale-rules

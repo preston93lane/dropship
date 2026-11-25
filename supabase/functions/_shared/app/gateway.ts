@@ -330,7 +330,7 @@ export function createGateway(deps: Deps, cfg: GatewayConfig) {
         ...(b.rationale ? { rationale: String(b.rationale) } : {}),
         ...(b.idempotency_key ? { idempotency_key: String(b.idempotency_key) } : {}),
       });
-      return json(row, row.status === "rejected" ? 422 : row.status === "pending_approval" ? 202 : 200);
+      return json(row, row.status === "rejected" || row.status === "failed" ? 422 : row.status === "pending_approval" ? 202 : 200);
     }],
     ["GET", /^\/v1\/actions$/, async ({ url }) => {
       const status = url.searchParams.get("status");

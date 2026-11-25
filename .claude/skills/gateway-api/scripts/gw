@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# gw METHOD PATH [JSON | @file.json]
+#   gw GET  /v1/summary
+#   gw POST /v1/products '{"title":"..."}'
+#   gw POST /v1/actions @action.json
+# Auth: GATEWAY_KEY (vault credential in the cloud; dev-agent-key locally). Identity: AGENT_NAME.
+# Prints the JSON body, then the HTTP status on its own line. Non-2xx exits 1.
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+[ -f "$DIR/gateway.env" ] && source "$DIR/gateway.env"
+: "${GATEWAY_URL:?GATEWAY_URL not set (edit gateway.env or export it)}"
+: "${GATEWAY_KEY:?GATEWAY_KEY not set (vault credential missing?)}"
+method="${1:?method}"; path="${2:?path}"; data="${3:-}"
+args=(-sS -X "$method" -H "Authorization: Bearer $GATEWAY_KEY" -H "x-agent: ${AGENT_NAME:-agent}" -H "content-type: application/json" -o /tmp/gw_body.$$ -w '%{http_code}')
+if [[ -n "$data" ]]; then
+  if [[ "$data" == @* ]]; then args+=(--data-binary "$data"); else args+=(--data "$data"); fi
+fi
+code=$(curl "${args[@]}" "${GATEWAY_URL%/}$path")
+cat /tmp/gw_body.$$; rm -f /tmp/gw_body.$$
+echo; echo "HTTP $code"
+[[ "$code" =~ ^2 ]]

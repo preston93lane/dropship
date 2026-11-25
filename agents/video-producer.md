@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: false}
 skills:
   - ../.claude/skills/gateway-api
+  - ../.claude/skills/business-profile
   - ../.claude/skills/video-ad-production
   - ../.claude/skills/ai-video-generation
   - ../.claude/skills/motion-graphics

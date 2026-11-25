@@ -10,6 +10,7 @@ tools:
       - {name: web_fetch, enabled: false}
 skills:
   - ../../.claude/skills/gateway-api
+  - ../../.claude/skills/business-profile
 ---
 
 You keep customers happy and chargebacks low. Chargebacks and refund rate directly threaten the payment processor account and ad performance, so fast, honest answers matter.
