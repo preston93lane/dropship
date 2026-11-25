@@ -9,7 +9,9 @@ Decision engine, gateway, guardian, schema, agents, skills, media pipeline, temp
 - [x] Static, Remotion and ffmpeg renders verified locally
 
 ## Phase 1: Assisted research (days 1-3) · cost: Claude usage only
-- [ ] Choose the niche; fill in `.claude/skills/business-profile/SKILL.md` (brand, avatar, exclusions)
+- [x] First-products research and a year-one forecast ([docs/research/2026-11-first-products-and-forecast.md](research/2026-11-first-products-and-forecast.md), `npm run forecast`)
+- [ ] Choose the niche (recommended: dog owners' home and travel gear); fill in `.claude/skills/business-profile/SKILL.md` (brand, avatar, exclusions)
+- [ ] Get US-warehouse supplier quotes for the 3 launch products against their walk-away landed costs; order samples
 - [ ] `npm ci && npm run demo && npm run dev:gateway`; explore the console with demo data
 - [ ] `npm run loop -- research` (runs the RESEARCH loop in Claude Code against the local gateway)
 - [ ] Review candidates in the console (`http://localhost:8787/console`, key `dev-admin-key`)
@@ -32,7 +34,7 @@ Decision engine, gateway, guardian, schema, agents, skills, media pipeline, temp
 - [ ] With **DRY_RUN=false on a development store first**, create one draft listing through the gateway and verify it in Shopify admin (C14)
 - **DoD**: draft listings created via the gateway; the console works on your phone; notifications arrive.
 
-## Phase 4: Paid tests at autonomy L1 (weeks 3-4) · cost: $500-1,500 of ad spend
+## Phase 4: Paid tests at autonomy L1 (weeks 3-4) · cost: $1,500-3,000 of ad spend over the first 2 months
 - [ ] Meta Business Manager, domain verification, pixel + Conversions API, **ad account spending limit**, system-user token (C15)
 - [ ] Verify the Meta adapter in a test campaign: create paused → activate → budget → pause → insights sync
 - [ ] Set guardrails in the console: `maxDailyAdSpend`, per-ad-set cap, tests/day

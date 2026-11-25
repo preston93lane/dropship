@@ -111,12 +111,21 @@ export interface MarginGates {
   minMarkup: number;
   /** Minimum contribution margin (0.35 = 35%). */
   minContributionMarginPct: number;
+  /**
+   * Mid/high-ticket relief: a product earning at least this much contribution per order only needs
+   * `highTicketMinMarkup`. Paid social needs dollars of headroom per order, and a $80 product at 2.2x
+   * has far more CPA room than a $25 product at 3x.
+   */
+  highTicketContribution?: number;
+  highTicketMinMarkup?: number;
 }
 
 export const DEFAULT_MARGIN_GATES: MarginGates = {
   minContribution: 15,
   minMarkup: 2.5,
   minContributionMarginPct: 0.35,
+  highTicketContribution: 30,
+  highTicketMinMarkup: 2.0,
 };
 
 export function checkMarginGates(ue: UnitEconomics, gates: MarginGates = DEFAULT_MARGIN_GATES): {
@@ -127,8 +136,10 @@ export function checkMarginGates(ue: UnitEconomics, gates: MarginGates = DEFAULT
   if (ue.contribution < gates.minContribution) {
     failures.push(`contribution $${ue.contribution} < $${gates.minContribution} minimum (cannot afford a realistic CPA)`);
   }
-  if (ue.markup < gates.minMarkup) {
-    failures.push(`markup ${ue.markup}x < ${gates.minMarkup}x minimum`);
+  const highTicket = gates.highTicketContribution !== undefined && ue.contribution >= gates.highTicketContribution;
+  const requiredMarkup = highTicket ? (gates.highTicketMinMarkup ?? gates.minMarkup) : gates.minMarkup;
+  if (ue.markup < requiredMarkup) {
+    failures.push(`markup ${ue.markup}x < ${requiredMarkup}x minimum${highTicket ? " (high-ticket rule)" : ""}`);
   }
   if (ue.contributionMarginPct < gates.minContributionMarginPct) {
     failures.push(

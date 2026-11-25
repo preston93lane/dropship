@@ -66,8 +66,8 @@ You don't run anything. The loops fire on schedule, and you interact through thr
 Things only you can do, in the order you'll hit them.
 
 ### Decisions (day 1)
-- [ ] **Niche, brand name, customer, exclusions** → edit `.claude/skills/business-profile/SKILL.md`. This steers everything. Pick something demonstrable on video, $25-60, with US-warehouse suppliers.
-- [ ] **Money**: an ad-testing budget (I recommend $1,500-3,000) and a monthly tooling budget (~$200-320 in Lean mode until the first winner).
+- [ ] **Niche, brand name, customer, exclusions** → edit `.claude/skills/business-profile/SKILL.md`. This steers everything. My recommendation, with the evidence, the first three products and the money math: **[docs/research/2026-11-first-products-and-forecast.md](research/2026-11-first-products-and-forecast.md)** (dog owners' home and travel gear, $60-100 products).
+- [ ] **Money**: risk capital of **$5,000 (minimum $3,000)** for testing, plus ~$265/month for tools and the machine in Lean mode until the first winner. `npm run forecast` shows what to expect month by month.
 - [ ] **Timezone**: schedules default to America/New_York (`deployments/*.md`).
 
 ### Accounts and keys (week 1-2, see `docs/07-setup.md`)
@@ -141,7 +141,7 @@ keeps the ad accounts, the payment processor and the FTC off your back.
 
 | | |
 |---|---|
-| ✅ Built and verified here | Decision engine, database (run on Postgres), gateway, guardian, console, Telegram, order webhooks + P&L, compliance judge (contract), insights, demo/loop/smoke tooling, video pipeline (rendered), templates (rendered), agents/skills/deployments (structure-tested). 40 automated tests, TypeScript + Deno type checks |
+| ✅ Built and verified here | Decision engine, database (run on Postgres), gateway, guardian, console, Telegram, order webhooks + P&L, compliance judge (contract), insights, demo/loop/smoke tooling, video pipeline (rendered), templates (rendered), agents/skills/deployments (structure-tested), year-one forecast. 44 automated tests, TypeScript + Deno type checks |
 | 🟡 Needs your accounts to verify | Shopify, Meta, TikTok and CJ adapters; live fal calls (endpoints and prices checked 2026-11-25; a few input field names unconfirmed); Telegram bot; the judge's live API call; `ant apply` |
 | 🔲 Planned (specified in `docs/05-component-catalog.md`) | Automatic LLM cost sync, creative previews in Telegram, AI-label via API, Advantage+ scaling, TikTok Shop GMV Max, affiliate and support agents, retention email/SMS, multi-store |
 

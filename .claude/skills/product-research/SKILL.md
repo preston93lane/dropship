@@ -26,7 +26,7 @@ A winning product for this business has five things at once: **(1) a visual "wow
 
 - Anything in the business profile's exclusions, or needing health, medical, weight-loss, earnings or safety claims to sell.
 - IP risk: brand names, logos, characters, licensed designs, patented "as seen on TV" items, knockoffs.
-- Contribution < $15 or markup < 2.5x after real shipping costs.
+- Contribution < $15, or markup < 2.5x after real shipping costs (2.0x is enough when contribution is ≥ $30: mid-ticket products have the dollar headroom paid social needs).
 - Shipping > 12 days with no US-warehouse alternative (refund and chargeback risk, and TikTok Shop ineligible).
 - Fragile, sizing-dependent, or electrical items with certification needs (UL/FCC) and no documentation, unless the margin is very high.
 - Already in our product list in any state (check `dedupe_key`).

@@ -21,7 +21,7 @@ Example: price $39.99, COGS $8.50, shipping $4.50 → contribution ≈ $23.53, b
 
 ## Gates (defaults, configurable by the operator)
 
-Contribution ≥ $15 · markup ≥ 2.5x landed · contribution margin ≥ 35%. Below these, paid social cannot reliably buy customers profitably.
+Contribution ≥ $15 · markup ≥ 2.5x landed (≥ 2.0x when contribution ≥ $30) · contribution margin ≥ 35%. Below these, paid social cannot reliably buy customers profitably. Mid-ticket products ($60-100) usually beat cheap viral items: the cheapest viral pet toys sell for $9-13 on TikTok Shop and Amazon, which leaves no room for a paid-social CPA.
 
 ## Pricing
 

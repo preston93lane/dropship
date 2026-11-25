@@ -74,8 +74,12 @@ and an agency or freelancer static runs $25-75.
 
 - Test budget per product ≈ **6 × breakeven CPA** (e.g. $20 BE → ~$120), but the guardian kills most losers
   at 1-1.5× BE per ad, so a typical failed test spends ~$60-120.
-- Planning hit rate: **10-20%** of validated products become winners (the research loop and calibration aim to raise this).
-- **Expected ad spend per winner ≈ $500-1,200** at a 15% hit rate, plus ~$10-15 of creative per test.
+- Planning hit rate: **10-20%** of validated products *look* like winners in a test, but about a third of those are false
+  positives. For a new store, plan on **6-8% becoming real, scalable winners** (the research loop and calibration aim to raise this).
+- **Expected ad spend per real winner**: about $500-1,200 for cheap products ($20 breakeven CPA); about **$2,500-4,000** for the
+  mid-ticket products in [the first-products research](research/2026-11-first-products-and-forecast.md) ($30-50 breakeven CPA).
+  Plus ~$15-25 of creative per test.
+- Year-one scenarios, month by month: `npm run forecast -- --scenario all` (Monte Carlo, `scripts/forecast.ts`).
 - Calendar: 2 new tests a day is the default cap; 4 products testing at once.
 
 ## 3. What a winner is worth (illustrative, not a promise)

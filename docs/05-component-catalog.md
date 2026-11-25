@@ -43,6 +43,8 @@ against a real account or API · 📝 written, ready to apply or run · 🔲 pla
 | C35 | Demo data | ✅ | `scripts/demo.ts` (`npm run demo`) | A realistic week: winner, kills, iteration, approvals, orders, report |
 | C36 | Loop launcher | ✅ | `scripts/loop.mjs` (`npm run loop -- <loop>`) | Runs any loop in Claude Code with the cloud kickoff |
 | C37 | Smoke test | ✅ | `scripts/smoke.mjs` (`npm run smoke`) | Read-only checks of a deployed gateway, auth, webhooks and key scopes |
+| C38 | Year-one forecast | ✅ | `scripts/forecast.ts` (`npm run forecast`) | Monte Carlo of tests, kills, false positives, scaling, fade, seasonality, machine cost and cash; conservative/base/optimistic; conditional-on-winner stats. Calibrated to public benchmarks; re-fit `rMedian` after 10-15 real tests |
+| C39 | First-products research | ✅ | `docs/research/2026-11-first-products-and-forecast.md` | Niche, 3 launch products with evidence and comps, unit economics and walk-away landed costs, spend breakdown, month 1-2 and year-one outlook |
 
 ## Agents and orchestration
 

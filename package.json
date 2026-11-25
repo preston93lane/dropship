@@ -12,6 +12,7 @@
     "typecheck": "tsc -p tsconfig.json",
     "check:edge": "npx --yes deno@2.9.6 check --node-modules-dir=none supabase/functions/gateway/index.ts supabase/functions/guardian/index.ts",
     "economics": "node --experimental-strip-types --no-warnings scripts/economics.ts",
+    "forecast": "node --experimental-strip-types --no-warnings scripts/forecast.ts",
     "agents:sync-claude-code": "node scripts/sync-claude-code-agents.mjs",
     "agents:plan": "npm run skills:clean && ant apply --dry-run -v agents environments vaults memory_stores deployments",
     "proposals:pull": "node scripts/proposals.mjs",

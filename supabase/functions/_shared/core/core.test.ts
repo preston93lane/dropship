@@ -28,6 +28,16 @@ test("unit economics: thin-margin product fails gates", () => {
   assert.ok(gates.failures.some((f) => f.includes("contribution")));
 });
 
+test("high-ticket products need 2.0x markup only when contribution >= $30", () => {
+  // $79.99 fountain with $38 landed: ~2.1x markup, ~$35 contribution -> passes on the high-ticket rule
+  const fountain = unitEconomics({ price: 79.99, cogs: 28, shippingCost: 10 });
+  assert.ok(fountain.markup < 2.5 && fountain.contribution >= 30);
+  assert.ok(checkMarginGates(fountain).pass, JSON.stringify(checkMarginGates(fountain)));
+  // a $29.99 item at 2.1x still fails (not enough dollars of CPA headroom)
+  const cheap = unitEconomics({ price: 29.99, cogs: 10, shippingCost: 4.3 });
+  assert.equal(checkMarginGates(cheap).pass, false);
+});
+
 test("suggestPrice uses markup, floor and charm ending", () => {
   assert.equal(suggestPrice(13), 39.99);
   assert.equal(suggestPrice(5), 24.99);

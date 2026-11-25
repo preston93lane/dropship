@@ -28,6 +28,7 @@ RESEARCH ──▶ PLAN ──▶ EXECUTE (create + list + launch) ──▶ ADA
 6. [docs/05-component-catalog.md](docs/05-component-catalog.md): every component and its status
 7. [docs/06-guardrails-and-compliance.md](docs/06-guardrails-and-compliance.md): money, legal and security
 8. [docs/07-setup.md](docs/07-setup.md): accounts, keys and deployment, step by step
+9. [docs/research/2026-11-first-products-and-forecast.md](docs/research/2026-11-first-products-and-forecast.md): the first products to test, and what year one should look like financially
 
 ## Try it locally in 5 minutes (no accounts needed)
 
